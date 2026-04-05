@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高配当株ポートフォリオ管理</title>
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a3a5c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="高配当株">
+<link rel="apple-touch-icon" href="./icon.svg">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4f8;--card:#fff;--primary:#1a3a5c;--primary-light:#2d6da3;
+  --accent:#e8a020;--success:#27ae60;--warn:#f39c12;--danger:#e74c3c;
+  --def:#2e86ab;--cyc:#e07b39;--text:#2c3e50;--muted:#7f8c8d;
+  --border:#dde3ea;--shadow:0 2px 10px rgba(0,0,0,.08);
+}
+body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+a{color:var(--primary-light);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* HEADER */
+header{background:var(--primary);color:#fff;padding:0 20px;display:flex;align-items:center;gap:12px;height:56px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+header h1{font-size:18px;font-weight:700;letter-spacing:.5px}
+header span{font-size:12px;opacity:.7;margin-left:4px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.badge-total{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:13px}
+
+/* TABS */
+nav{background:var(--primary);border-top:1px solid rgba(255,255,255,.1)}
+.tabs{display:flex;padding:0 12px;gap:0}
+.tab-btn{background:none;border:none;color:rgba(255,255,255,.7);padding:10px 16px;cursor:pointer;font-size:13px;font-family:inherit;border-bottom:3px solid transparent;transition:.2s}
+.tab-btn:hover{color:#fff}
+.tab-btn.active{color:#fff;border-bottom-color:var(--accent);font-weight:600}
+
+/* MAIN */
+main{padding:20px;max-width:1400px;margin:0 auto}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.stat-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-card .value{font-size:22px;font-weight:700;color:var(--primary)}
+.stat-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-card.good .value{color:var(--success)}
+.stat-card.warn .value{color:var(--warn)}
+.stat-card.bad .value{color:var(--danger)}
+
+/* ALERTS */
+.alert-panel{margin-bottom:20px}
+.alert-panel h3{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)}
+.alerts-list{display:flex;flex-direction:column;gap:6px}
+.alert-item{background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid;box-shadow:var(--shadow);font-size:13px;display:flex;align-items:center;gap:10px}
+.alert-item.warn{border-color:var(--warn)}
+.alert-item.danger{border-color:var(--danger)}
+.alert-item.info{border-color:var(--def)}
+.alert-item .alert-icon{font-size:16px;flex-shrink:0}
+.no-alerts{background:var(--card);border-radius:8px;padding:12px 16px;color:var(--success);font-size:13px;box-shadow:var(--shadow)}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px}
+.chart-card{background:var(--card);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+.chart-card h3{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.chart-card canvas{max-height:220px}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.section-header h2{font-size:15px;font-weight:700}
+
+/* TABLE */
+.table-wrap{background:var(--card);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.table-toolbar{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.table-toolbar input[type=text]{border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;outline:none;width:200px}
+.table-toolbar select{border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;outline:none;background:#fff}
+table{width:100%;border-collapse:collapse}
+th{background:#f8fafc;font-size:11px;font-weight:600;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+th.sort-asc::after{content:' ▲'}
+th.sort-desc::after{content:' ▼'}
+th[data-sort]{cursor:pointer}
+th[data-sort]:hover{background:#eef2f7}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:22px;border-radius:4px;font-size:12px;font-weight:700;color:#fff}
+.score-s{background:#1e8449}
+.score-a{background:#27ae60}
+.score-b{background:#f39c12}
+.score-c{background:#e67e22}
+.score-d{background:#e74c3c}
+.market-badge{font-size:10px;font-weight:600;border-radius:3px;padding:2px 5px}
+.market-jp{background:#fff0f0;color:#c0392b}
+.market-us{background:#f0f7ff;color:#1a6fa0}
+.def-badge{background:#e8f4f8;color:var(--def);font-size:10px;padding:2px 5px;border-radius:3px;font-weight:600}
+.cyc-badge{background:#fef4ec;color:var(--cyc);font-size:10px;padding:2px 5px;border-radius:3px;font-weight:600}
+.nanpin-btn{font-size:11px;padding:2px 7px;border-radius:3px;font-weight:700}
+.nanpin-1{background:#fff8e1;color:#f57f17}
+.nanpin-2{background:#ffebee;color:#b71c1c}
+.action-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:2px 5px;border-radius:4px;transition:.15s}
+.action-btn:hover{background:var(--bg)}
+.pl-positive{color:var(--success);font-weight:600}
+.pl-negative{color:var(--danger);font-weight:600}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#219a52}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#c0392b}
+.btn-outline{background:#fff;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline:hover{background:#f0f4f8}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:5px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:12px;width:100%;max-width:740px;box-shadow:0 8px 40px rgba(0,0,0,.2);animation:slideDown .25s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+.modal-header h2{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;padding:4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:22px;max-height:75vh;overflow-y:auto}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+/* FORM */
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:600;color:var(--text)}
+input,select,textarea{border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;transition:.15s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(45,109,163,.1)}
+textarea{resize:vertical;min-height:60px}
+.trend-select{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.trend-select label{cursor:pointer;text-align:center;padding:5px 3px;border-radius:5px;border:1.5px solid var(--border);font-size:11px;font-weight:600;transition:.15s}
+.trend-select input[type=radio]{display:none}
+.trend-select input[type=radio]:checked+label{border-color:var(--primary);background:var(--primary);color:#fff}
+.metric-hint{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* SCORE DISPLAY */
+.score-display{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-radius:10px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.score-big{font-size:48px;font-weight:700;line-height:1}
+.score-info{flex:1}
+.score-info .grade{font-size:22px;font-weight:700;margin-bottom:4px}
+.score-info .verdict{font-size:13px;opacity:.85}
+.score-bars{width:100%}
+.score-bar-row{display:grid;grid-template-columns:120px 1fr 40px;align-items:center;gap:8px;margin-bottom:6px}
+.score-bar-row .bar-label{font-size:11px;color:var(--muted)}
+.score-bar-track{background:#eee;border-radius:4px;height:8px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:4px;transition:.3s}
+.score-bar-row .bar-pts{font-size:11px;font-weight:600;text-align:right}
+
+/* SCREENING */
+.screen-form{background:var(--card);border-radius:10px;padding:20px;box-shadow:var(--shadow)}
+.screen-result{background:var(--card);border-radius:10px;padding:20px;box-shadow:var(--shadow);margin-top:16px}
+
+/* GUIDE */
+.guide-section{background:var(--card);border-radius:10px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.guide-section h3{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.guide-section ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.guide-section li{display:flex;gap:8px;font-size:13px;line-height:1.6}
+.guide-section li::before{content:'•';color:var(--accent);font-weight:700;flex-shrink:0}
+.rule-card{border-left:3px solid var(--primary);padding:10px 14px;background:#f8fafc;border-radius:0 7px 7px 0;margin-bottom:8px}
+.rule-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.rule-card p{font-size:12px;color:var(--muted);line-height:1.6}
+.link-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.link-card{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f8fafc;border-radius:8px;border:1.5px solid var(--border);transition:.15s}
+.link-card:hover{border-color:var(--primary-light);background:#eef4fb}
+.link-icon{font-size:22px}
+.link-text strong{display:block;font-size:13px;color:var(--text)}
+.link-text span{font-size:11px;color:var(--muted)}
+
+/* MISC */
+.empty-state{padding:48px 20px;text-align:center;color:var(--muted)}
+.empty-state p{font-size:15px;margin-bottom:8px}
+.empty-state small{font-size:12px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#fff;border-radius:10px;padding:24px;max-width:360px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,.2);text-align:center}
+.confirm-box p{margin-bottom:16px;font-size:14px}
+.confirm-box .btn-row{display:flex;gap:10px;justify-content:center}
+.no-data{display:flex;align-items:center;justify-content:center;height:120px;color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.pill.green{background:#e8f8f0;color:var(--success)}
+.pill.red{background:#fef0f0;color:var(--danger)}
+.info-row{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+@media(max-width:600px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  table{font-size:12px}
+  td,th{padding:8px 8px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:22px">📈</div>
+  <h1>高配当株ポートフォリオ</h1>
+  <span>リベ大流</span>
+  <div class="header-right">
+    <span id="fetch-status" style="font-size:11px;opacity:.7"></span>
+    <button id="refresh-btn" onclick="fetchPrices()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">🔄 株価更新</button>
+    <select onchange="setAutoRefresh(+this.value)" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px;border-radius:6px;font-size:12px">
+      <option value="0">手動のみ</option>
+      <option value="5">5分ごと</option>
+      <option value="10">10分ごと</option>
+      <option value="30">30分ごと</option>
+    </select>
+    <span id="auto-refresh-status" style="font-size:11px;opacity:.7;white-space:nowrap">自動更新オフ</span>
+    <div class="badge-total" id="header-summary">読み込み中...</div>
+    <button class="btn btn-outline btn-sm" onclick="exportData()" style="border-color:rgba(255,255,255,.4);color:#fff">💾 エクスポート</button>
+    <label class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,.4);color:#fff;cursor:pointer">
+      📂 インポート<input type="file" accept=".json" style="display:none" onchange="importData(this)">
+    </label>
+    <a href="./github_setup_guide.html" target="_blank" class="btn btn-outline btn-sm" style="border-color:rgba(255,200,60,.6);color:#f0c040;white-space:nowrap">📱 スマホ設定</a>
+  </div>
+</header>
+
+<nav>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 ダッシュボード</button>
+    <button class="tab-btn" onclick="showTab('portfolio',this)">📋 保有銘柄</button>
+    <button class="tab-btn" onclick="showTab('screening',this)">🔍 銘柄スクリーニング</button>
+    <button class="tab-btn" onclick="showTab('guide',this)">📚 投資ガイド</button>
+    <button class="tab-btn" onclick="showTab('watchlist',this)">🔔 通知・ウォッチ</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="stat-grid" id="stat-grid"></div>
+  <div class="alert-panel">
+    <h3>⚠️ アラート・チェック</h3>
+    <div id="alerts-list"></div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>セクター配分</h3>
+      <canvas id="chart-sector"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>ディフェンシブ vs 景気敏感</h3>
+      <canvas id="chart-type"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>配当金トップ10銘柄</h3>
+      <canvas id="chart-top-div"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO -->
+<div id="tab-portfolio" class="tab-content">
+  <div class="section-header">
+    <h2>保有銘柄一覧</h2>
+    <button class="btn btn-primary" onclick="openAddModal()">＋ 銘柄追加</button>
+  </div>
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <input type="text" id="search-input" placeholder="🔍 銘柄名・コードで検索" oninput="renderPortfolio()">
+      <select id="filter-sector" onchange="renderPortfolio()">
+        <option value="">すべてのセクター</option>
+      </select>
+      <select id="filter-type" onchange="renderPortfolio()">
+        <option value="">種別すべて</option>
+        <option value="defensive">ディフェンシブ</option>
+        <option value="cyclical">景気敏感</option>
+        <option value="other">その他</option>
+      </select>
+      <select id="filter-market" onchange="renderPortfolio()">
+        <option value="">市場すべて</option>
+        <option value="japan">日本株</option>
+        <option value="us">米国株</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>コード</th>
+            <th>銘柄名</th>
+            <th>市場</th>
+            <th>セクター</th>
+            <th>種別</th>
+            <th data-sort="shares" onclick="sortTable(this)">株数</th>
+            <th data-sort="purchasePrice" onclick="sortTable(this)">購入単価</th>
+            <th data-sort="currentPrice" onclick="sortTable(this)">現在値</th>
+            <th data-sort="pl" onclick="sortTable(this)">含み損益</th>
+            <th data-sort="yield" onclick="sortTable(this)">利回り</th>
+            <th data-sort="annualDiv" onclick="sortTable(this)">年間配当</th>
+            <th data-sort="score" onclick="sortTable(this)">スコア</th>
+            <th>ナンピン</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="portfolio-tbody"></tbody>
+      </table>
+    </div>
+    <div id="portfolio-empty" class="empty-state" style="display:none">
+      <p>保有銘柄がありません</p>
+      <small>「銘柄追加」ボタンから最初の銘柄を登録してください</small>
+    </div>
+  </div>
+</div>
+
+<!-- SCREENING -->
+<div id="tab-screening" class="tab-content">
+  <div class="section-header">
+    <h2>銘柄スクリーニング（IRバンク活用）</h2>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+    <a href="https://irbank.net" target="_blank">IR Bank</a> や
+    <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ファイナンス</a>
+    で調べた指標を入力して、銘柄のスコアを評価します。
+  </p>
+  <div class="screen-form">
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>証券コード</label>
+        <input type="text" id="sc-code" placeholder="例：8058">
+      </div>
+      <div class="form-group">
+        <label>銘柄名</label>
+        <input type="text" id="sc-name" placeholder="例：三菱商事">
+      </div>
+    </div>
+    <div id="screening-form-content"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="calcScreening()">📊 スコアを計算する</button>
+      <button class="btn btn-outline" onclick="addFromScreening()">＋ ポートフォリオに追加</button>
+    </div>
+  </div>
+  <div id="screening-result" style="display:none"></div>
+</div>
+
+<!-- GUIDE -->
+<div id="tab-guide" class="tab-content">
+  <div class="guide-section">
+    <h3>🎯 リベ大流 高配当株投資の5原則</h3>
+    <div class="rule-card">
+      <h4>① 投資先は「米国株」と「日本株」の2本柱</h4>
+      <p>比率は日本株50%：米国株50%が目安。日本在住者は円でのキャッシュフローが重要なため、日本株も必須。</p>
+    </div>
+    <div class="rule-card">
+      <h4>② 集中投資禁止・50銘柄以上に分散</h4>
+      <p>1銘柄への依存で減配リスクが急増。1社あたりの配当金を全体の3%以内に抑える。</p>
+    </div>
+    <div class="rule-card">
+      <h4>③ 米国株は高配当ETFで対応（VYM・HDVなど）</h4>
+      <p>低コスト・増配トレンド・値動きの安定性。米国は個別より優れたETFが多い。</p>
+    </div>
+    <div class="rule-card">
+      <h4>④ 日本株は個別銘柄で「自作ファンド」を構築</h4>
+      <p>日本株ETFは分配金が不安定・手数料高め。自分で銘柄を選ぶことでディフェンシブ銘柄を重視できる。</p>
+    </div>
+    <div class="rule-card">
+      <h4>⑤ ポートフォリオの守備力ルール</h4>
+      <ul style="list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:4px">
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>1セクターの比率 → 20%以下</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>1銘柄からの配当金 → 全体の3%以内</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>ディフェンシブ銘柄比率 → 50%以上</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>ナンピンは買値から20%下落で1回目、40%下落で2回目（計2回まで）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <h3>🔍 IRバンクで確認すべき8項目</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">
+      <div class="rule-card">
+        <h4>① 売上高トレンド</h4>
+        <p>右肩上がり or 激しすぎない増減。安定が基本。</p>
+      </div>
+      <div class="rule-card">
+        <h4>② EPS（1株利益）★最重要</h4>
+        <p>長期的に右肩上がりが必須。下降トレンドは投資不適。</p>
+      </div>
+      <div class="rule-card">
+        <h4>③ 営業利益率</h4>
+        <p>10%以上で優秀。5%以下は要注意。トレンドも確認。</p>
+      </div>
+      <div class="rule-card">
+        <h4>④ 自己資本比率</h4>
+        <p>40%以上推奨。60%以上で安心。80%以上なら盤石。</p>
+      </div>
+      <div class="rule-card">
+        <h4>⑤ 営業キャッシュフロー</h4>
+        <p>毎年黒字かつ増加傾向が理想。10年内に一度でも赤字は注意。</p>
+      </div>
+      <div class="rule-card">
+        <h4>⑥ 現金等の推移</h4>
+        <p>手元現金が増加トレンドにあること。キャッシュリッチが不況に強い。</p>
+      </div>
+      <div class="rule-card">
+        <h4>⑦ 1株当たり配当金 ★重要</h4>
+        <p>減配・無配なし。長期増配トレンドが理想。不況時も維持できるか確認。</p>
+      </div>
+      <div class="rule-card">
+        <h4>⑧ 配当性向</h4>
+        <p>30〜50%が健全。70〜80%超は減配リスク大。低すぎる場合も還元姿勢を確認。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <h3>🐣 こびと株の10条件（スクリーニング追加基準）</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      両学長（リベ大）と協働するこびと株氏の厳選基準。上記8項目に加えてこの条件で二重チェック。
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+      <div class="rule-card"><h4>① 配当利回り 3.75%以上</h4><p>税引後3%相当。33年で元本回収できる水準。</p></div>
+      <div class="rule-card"><h4>② PBR 0.5〜1.5倍</h4><p>純資産の0.5〜1.5倍で買える水準。過度な成長期待なし。</p></div>
+      <div class="rule-card"><h4>③ 配当政策が明確</h4><p>IR資料に配当方針が明文化され、過去の実績と矛盾しない。</p></div>
+      <div class="rule-card"><h4>④ 配当継続力が高い</h4><p>利益剰余金・ネットキャッシュで何年配当を出せるか。</p></div>
+      <div class="rule-card"><h4>⑤⑥⑦ 売上・EPS・BPS上昇</h4><p>長期的に売上・1株利益・1株純資産が右肩上がり。</p></div>
+      <div class="rule-card"><h4>⑧ 自己資本比率 50%以上</h4><p>こびと株基準は50%以上（リベ大40%より厳格）。</p></div>
+      <div class="rule-card"><h4>⑨ 流動比率 200%以上</h4><p>短期債務の2倍の流動資産。支払い余力の証明。</p></div>
+      <div class="rule-card"><h4>⑩ 現金比率が高く上昇中</h4><p>手元現金の増加傾向。不況でも配当を守れる体力。</p></div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <h3>🔗 便利なリンク集</h3>
+    <div class="link-grid">
+      <a href="https://irbank.net" target="_blank" class="link-card">
+        <div class="link-icon">📊</div>
+        <div class="link-text"><strong>IR Bank</strong><span>財務データ・配当履歴の分析</span></div>
+      </a>
+      <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank" class="link-card">
+        <div class="link-icon">🏦</div>
+        <div class="link-text"><strong>Yahoo!ファイナンス</strong><span>高配当利回りランキング</span></div>
+      </a>
+      <a href="https://www.sbisec.co.jp" target="_blank" class="link-card">
+        <div class="link-icon">💹</div>
+        <div class="link-text"><strong>SBI証券</strong><span>1株単位で少額投資可能</span></div>
+      </a>
+      <a href="https://kabutan.jp" target="_blank" class="link-card">
+        <div class="link-icon">📉</div>
+        <div class="link-text"><strong>株探（かぶたん）</strong><span>業績・配当情報の確認</span></div>
+      </a>
+      <a href="https://minkabu.jp" target="_blank" class="link-card">
+        <div class="link-icon">🔎</div>
+        <div class="link-text"><strong>みんかぶ</strong><span>銘柄スクリーニング</span></div>
+      </a>
+      <a href="https://seekingalpha.com" target="_blank" class="link-card">
+        <div class="link-icon">🌐</div>
+        <div class="link-text"><strong>Seeking Alpha</strong><span>米国株の配当分析</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- WATCHLIST TAB -->
+<div class="tab-content" id="tab-watchlist">
+  <div class="section-header">
+    <h2>🔔 リアルタイム通知・ウォッチリスト</h2>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:16px">
+    <h3>🛎 ブラウザ通知設定</h3>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+      <button onclick="requestNotificationPermission()" style="background:var(--primary);color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:13px">通知を許可する</button>
+      <span id="notif-status" style="font-size:13px;color:var(--muted)">ステータス確認中...</span>
+      <span style="font-size:12px;color:var(--muted)">※ ブラウザを開いている間のみ通知されます</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">
+      ウォッチ銘柄が設定した「目標配当利回り」や「目標PBR」に達するとデスクトップ通知が届きます。株価更新ボタンまたは自動更新を有効にしてください。
+    </p>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:16px">
+    <h3>➕ 監視銘柄を追加（こびと株10条件でアラート）</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px">
+      <div class="form-group" style="margin:0">
+        <label>証券コード</label>
+        <input type="text" id="w-code" placeholder="例：8058 / VYM" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>銘柄名（省略可）</label>
+        <input type="text" id="w-name" placeholder="自動取得されます" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>市場</label>
+        <select id="w-market" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 8px;font-size:13px;background:#fff">
+          <option value="japan">日本株</option>
+          <option value="us">米国株</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>目標利回り（% 以上で通知）</label>
+        <input type="number" id="w-yield" placeholder="例：3.75" step="0.1" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>目標PBR（以下で通知）</label>
+        <input type="number" id="w-pbr" placeholder="例：1.5" step="0.01" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+      </div>
+      <div class="form-group" style="margin:0;display:flex;align-items:flex-end">
+        <button onclick="addWatchItem()" style="width:100%;background:var(--success);color:#fff;border:none;padding:8px;border-radius:7px;cursor:pointer;font-size:13px">追加する</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>コード</th><th>銘柄名</th><th>市場</th><th>現在株価（円）</th>
+          <th>配当利回り</th><th>PBR</th><th>目標利回り</th><th>目標PBR</th>
+          <th>ステータス</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="watchlist-tbody">
+        <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ウォッチ銘柄がありません。上のフォームから追加してください。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="guide-section" style="margin-top:20px">
+    <h3>📋 こびと株10条件チェックの手順</h3>
+    <ol style="font-size:13px;line-height:2;padding-left:20px;color:var(--text)">
+      <li>Yahoo!ファイナンスの高配当ランキングで候補を探す → <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ファイナンス 配当利回りランキング</a></li>
+      <li>IRBankで過去10年の業績を確認 → <a href="https://irbank.net" target="_blank">IRBank</a></li>
+      <li>配当利回り3.75%以上・PBR0.5〜1.5倍・自己資本比率50%以上・流動比率200%以上 をチェック</li>
+      <li>上のフォームに銘柄を登録して「目標利回り：3.75」「目標PBR：1.5」を設定</li>
+      <li>「🔄 株価更新」で自動チェック → 条件を満たすと通知が届く</li>
+    </ol>
+  </div>
+
+  <!-- GAS連携エクスポート -->
+  <div class="chart-card" style="margin-top:16px;border-left:4px solid var(--accent)">
+    <h3>📲 Androidスマホにリアルタイム通知（Google Apps Script連携）</h3>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 14px">PCが閉じていても、Googleのクラウドが24時間自動監視してスマホに通知します。</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px">
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
+        <div style="font-weight:700;margin-bottom:4px">☁️ Google Apps Script</div>
+        <div style="color:var(--muted)">Googleサーバーで10分ごとに自動実行（完全無料）</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
+        <div style="font-weight:700;margin-bottom:4px">🤖 Telegram Bot</div>
+        <div style="color:var(--muted)">シグナル発生時に即座にスマホへプッシュ通知</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
+        <div style="font-weight:700;margin-bottom:4px">📊 自動チェック項目</div>
+        <div style="color:var(--muted)">配当利回り・PBR・USD/JPY換算・毎朝9時サマリー</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button onclick="exportGasWatchlist()" style="background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600">
+        📥 ウォッチリストをGAS用にエクスポート
+      </button>
+      <a href="notification-bot/setup_guide.html" target="_blank" style="background:var(--accent);color:#fff;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none">
+        📖 セットアップガイドを開く
+      </a>
+      <span style="font-size:12px;color:var(--muted)">※ GASのConfig.gsに貼り付けて使用します</span>
+    </div>
+
+    <div id="gas-export-area" style="display:none;margin-top:14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">以下をコピーして GAS の Config.gs 内の <code>getDefaultWatchlist()</code> の return 配列と置き換えてください：</div>
+      <textarea id="gas-export-text" readonly style="width:100%;height:180px;font-family:monospace;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:10px;background:#1e2a3a;color:#a8d8a8;resize:vertical"></textarea>
+      <button onclick="copyGasExport()" style="margin-top:8px;background:var(--success);color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px">📋 クリップボードにコピー</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">銘柄を追加</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="stock-form" onsubmit="return false">
+        <input type="hidden" id="f-id">
+        <div class="form-section">
+          <div class="form-section-title">📌 基本情報</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>証券コード *</label>
+              <input type="text" id="f-code" placeholder="例：8058 / VYM" required>
+            </div>
+            <div class="form-group">
+              <label>銘柄名 *</label>
+              <input type="text" id="f-name" placeholder="例：三菱商事" required>
+            </div>
+            <div class="form-group">
+              <label>市場</label>
+              <select id="f-market">
+                <option value="japan">日本株</option>
+                <option value="us">米国株</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>セクター</label>
+              <select id="f-sector"></select>
+            </div>
+            <div class="form-group">
+              <label>種別</label>
+              <select id="f-category">
+                <option value="defensive">ディフェンシブ</option>
+                <option value="cyclical">景気敏感</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">💰 保有情報</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>保有株数</label>
+              <input type="number" id="f-shares" min="0" step="1" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>購入単価（円）</label>
+              <input type="number" id="f-purchase-price" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>現在株価（円）</label>
+              <input type="number" id="f-current-price" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>年間配当金（1株あたり・円）</label>
+              <input type="number" id="f-dividend" min="0" step="0.01" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📈 IRバンク分析指標（任意）</div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:12px">
+            <a href="https://irbank.net" target="_blank">IRBank</a> で調べた情報を入力してスコアを算出します
+          </p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>① 売上高トレンド</label>
+              <div class="trend-select" id="ts-revenue">
+                <input type="radio" name="rev" id="rev--2" value="-2"><label for="rev--2">急下落</label>
+                <input type="radio" name="rev" id="rev--1" value="-1"><label for="rev--1">下落</label>
+                <input type="radio" name="rev" id="rev-0" value="0" checked><label for="rev-0">横ばい</label>
+                <input type="radio" name="rev" id="rev-1" value="1"><label for="rev-1">上昇</label>
+                <input type="radio" name="rev" id="rev-2" value="2"><label for="rev-2">急上昇</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>② EPS（1株利益）トレンド ★最重要</label>
+              <div class="trend-select" id="ts-eps">
+                <input type="radio" name="eps" id="eps--2" value="-2"><label for="eps--2">急下落</label>
+                <input type="radio" name="eps" id="eps--1" value="-1"><label for="eps--1">下落</label>
+                <input type="radio" name="eps" id="eps-0" value="0" checked><label for="eps-0">横ばい</label>
+                <input type="radio" name="eps" id="eps-1" value="1"><label for="eps-1">上昇</label>
+                <input type="radio" name="eps" id="eps-2" value="2"><label for="eps-2">急上昇</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>③ 営業利益率（%）</label>
+              <input type="number" id="f-op-margin" placeholder="例：12.5" step="0.1">
+              <span class="metric-hint">10%以上で優秀 / 5%以下は要注意</span>
+            </div>
+            <div class="form-group">
+              <label>④ 自己資本比率（%）</label>
+              <input type="number" id="f-equity-ratio" placeholder="例：55.0" step="0.1">
+              <span class="metric-hint">40%以上推奨 / 60%以上で安心</span>
+            </div>
+            <div class="form-group">
+              <label>⑤ 営業キャッシュフロー</label>
+              <div class="trend-select" id="ts-cf">
+                <input type="radio" name="cf" id="cf--2" value="-2"><label for="cf--2">赤字多</label>
+                <input type="radio" name="cf" id="cf--1" value="-1"><label for="cf--1">不安定</label>
+                <input type="radio" name="cf" id="cf-0" value="0" checked><label for="cf-0">横ばい</label>
+                <input type="radio" name="cf" id="cf-1" value="1"><label for="cf-1">黒字</label>
+                <input type="radio" name="cf" id="cf-2" value="2"><label for="cf-2">増加中</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>⑥ 現金等の推移</label>
+              <div class="trend-select" id="ts-cash">
+                <input type="radio" name="cash" id="cash--2" value="-2"><label for="cash--2">急減少</label>
+                <input type="radio" name="cash" id="cash--1" value="-1"><label for="cash--1">減少</label>
+                <input type="radio" name="cash" id="cash-0" value="0" checked><label for="cash-0">横ばい</label>
+                <input type="radio" name="cash" id="cash-1" value="1"><label for="cash-1">増加</label>
+                <input type="radio" name="cash" id="cash-2" value="2"><label for="cash-2">急増加</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>⑦ 配当金トレンド</label>
+              <div class="trend-select" id="ts-div">
+                <input type="radio" name="divt" id="divt--2" value="-2"><label for="divt--2">大幅減配</label>
+                <input type="radio" name="divt" id="divt--1" value="-1"><label for="divt--1">減配</label>
+                <input type="radio" name="divt" id="divt-0" value="0" checked><label for="divt-0">安定</label>
+                <input type="radio" name="divt" id="divt-1" value="1"><label for="divt-1">増配</label>
+                <input type="radio" name="divt" id="divt-2" value="2"><label for="divt-2">連続増配</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>⑧ 配当性向（%）</label>
+              <input type="number" id="f-payout" placeholder="例：42.0" step="0.1">
+              <span class="metric-hint">30〜50%が健全 / 70%超は注意</span>
+            </div>
+            <div class="form-group">
+              <label>⑨ PBR（株価純資産倍率）<small style="color:var(--muted)">こびと株条件</small></label>
+              <input type="number" id="f-pbr" placeholder="例：0.8" step="0.01" min="0">
+              <span class="metric-hint">0.5〜1.5倍が理想 / 1.5超は割高の可能性</span>
+            </div>
+            <div class="form-group">
+              <label>⑩ 流動比率（%）<small style="color:var(--muted)">こびと株条件</small></label>
+              <input type="number" id="f-current-ratio" placeholder="例：220" step="1" min="0">
+              <span class="metric-hint">200%以上が理想 / 100%未満は短期支払い能力に注意</span>
+            </div>
+            <div class="form-group">
+              <label>⑪ 増配率 3年平均（%）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-div-growth3y" placeholder="例：5.2" step="0.1" min="-99">
+              <span class="metric-hint">IRBank配当推移から計算。5%以上で優秀 / 3%以上で合格ライン / マイナスは減配</span>
+            </div>
+            <div class="form-group">
+              <label>⑫ 増配率 5年平均（%）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-div-growth5y" placeholder="例：4.8" step="0.1" min="-99">
+              <span class="metric-hint">長期増配トレンドの安定性を示す。3年との乖離が大きい場合は近年の変化に注意</span>
+            </div>
+            <div class="form-group">
+              <label>⑬ 連続増配年数（年）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-consecutive-yrs" placeholder="例：10" step="1" min="0">
+              <span class="metric-hint">10年以上で「連続増配株」。20年以上は超優良。リーマン・コロナも乗り越えたか確認</span>
+            </div>
+            <div class="form-group full">
+              <label>メモ</label>
+              <textarea id="f-memo" placeholder="投資理由、気になる点など自由に記録"></textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveStock()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg"></p>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeConfirm()">キャンセル</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok">削除する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const SECTORS = [
+  {name:'食料品',type:'defensive'},{name:'医薬品',type:'defensive'},
+  {name:'電気・ガス',type:'defensive'},{name:'陸運',type:'defensive'},
+  {name:'通信',type:'defensive'},{name:'情報・通信',type:'other'},
+  {name:'銀行業',type:'other'},{name:'保険業',type:'other'},
+  {name:'証券・商品先物',type:'other'},{name:'その他金融',type:'other'},
+  {name:'不動産',type:'other'},{name:'建設業',type:'other'},
+  {name:'鉄鋼',type:'cyclical'},{name:'化学',type:'cyclical'},
+  {name:'機械',type:'cyclical'},{name:'輸送用機器',type:'cyclical'},
+  {name:'電気機器',type:'cyclical'},{name:'精密機器',type:'other'},
+  {name:'その他製品',type:'other'},{name:'卸売業',type:'cyclical'},
+  {name:'小売業',type:'other'},{name:'鉱業',type:'cyclical'},
+  {name:'石油・石炭',type:'cyclical'},{name:'パルプ・紙',type:'cyclical'},
+  {name:'ゴム製品',type:'other'},{name:'ガラス・土石',type:'other'},
+  {name:'非鉄金属',type:'cyclical'},{name:'倉庫・運輸関連',type:'other'},
+  {name:'サービス業',type:'other'},{name:'水産・農林業',type:'other'},
+  {name:'繊維製品',type:'other'},{name:'ETF（米国）',type:'other'},
+  {name:'その他',type:'other'}
+];
+
+const SECTOR_COLORS = [
+  '#2196F3','#4CAF50','#FF9800','#E91E63','#9C27B0','#00BCD4','#F44336',
+  '#3F51B5','#8BC34A','#FF5722','#009688','#FFC107','#795548','#607D8B',
+  '#CDDC39','#E040FB','#00E676','#FF6D00','#40C4FF','#FFAB40','#EA80FC',
+  '#B9F6CA','#FF80AB','#82B1FF','#CCFF90','#FFD180','#FF9E80','#84FFFF',
+  '#69F0AE','#40C4FF','#B388FF','#FFFF8D','#F4511E'
+];
+
+let state = {
+  stocks: [],
+  sortKey: null,
+  sortDir: 1,
+  editingId: null,
+  lastFetchTime: null,
+  autoRefreshInterval: null,
+  usdJpy: 150,
+  fetchStatus: 'idle',
+  watchlist: []
+};
+
+let charts = {};
+
+function loadData() {
+  const saved = localStorage.getItem('haikaitoDatabase_v3');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        state.stocks = parsed;
+        state.watchlist = [];
+      } else {
+        state.stocks = parsed.stocks || [];
+        state.watchlist = parsed.watchlist || [];
+      }
+      return;
+    } catch(e) { state.stocks = []; state.watchlist = []; return; }
+  }
+  state.watchlist = [];
+  // ポートフォリオ初期データ（2026-04-02 取り込み）
+    // ※ 株価・取得単価はアプリ画像から算出した概算値。現在値は要確認。
+    // ※ 予想配当（円/株/年）は画像記載値。配当利回りから現在株価を逆算。
+    state.stocks = [
+      // ─── 全世界・米国市場 ETF ───
+      {id:'p1', code:'VT',   name:'バンガード・トータル・ワールドストック ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
+       shares:37, purchasePrice:11224, currentPrice:22568, dividend:406.22,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
+       memo:'全世界株ETF。配当利回り1.80%。配当予定:3月6月9月12月。年利3.53%', updatedAt:'2026-04-02'},
+
+      {id:'p5', code:'VOO',  name:'バンガード S&P500 ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
+       shares:2, purchasePrice:49031, currentPrice:98745, dividend:1115.81,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
+       memo:'S&P500 ETF。配当利回り1.13%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      {id:'p6', code:'SPLG', name:'SPDR ポートフォリオS&P500 ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
+       shares:12, purchasePrice:19243, currentPrice:27527, dividend:308.30,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
+       memo:'S&P500低コストETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      {id:'p7', code:'VTI',  name:'バンガード・トータル・ストックマーケット ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
+       shares:19, purchasePrice:26882, currentPrice:52946, dividend:593.00,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
+       memo:'米国株式全体ETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      // ─── グロース ETF ───
+      {id:'p8', code:'QQQ',  name:'インベスコQQQ 信託シリーズ1',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:9, purchasePrice:25684, currentPrice:78306, dividend:360.21,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
+       memo:'NASDAQ100 ETF。配当利回り0.46%。配当予定:3月6月9月12月。株数は概算（要確認）', updatedAt:'2026-04-02'},
+
+      {id:'p9', code:'VUG',  name:'バンガード 米国グロースETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:7, purchasePrice:35038, currentPrice:73793, dividend:317.31,
+       revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
+       memo:'米国グロース株ETF。配当利回り0.43%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      // ─── 高配当 ETF ───
+      {id:'p12', code:'SPYD', name:'SPDR ポートフォリオS&P500 高配当株式ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
+       shares:40, purchasePrice:8098, currentPrice:7358, dividend:308.30,
+       revenueTrend:1, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'高配当S&P500 ETF。配当利回り4.19%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      {id:'p13', code:'VYM',  name:'バンガード 米国高配当株式ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
+       shares:10, purchasePrice:20420, currentPrice:16650, dividend:547.79,
+       revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:2, payoutRatio:0,
+       memo:'米国高配当ETF代表格。配当利回り3.29%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      {id:'p14', code:'HDV',  name:'iシェアーズ コア米国高配当株ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
+       shares:13, purchasePrice:18412, currentPrice:21444, dividend:617.44,
+       revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:1, payoutRatio:0,
+       memo:'米国高配当ETF。配当利回り2.88%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
+
+      // ─── カバードコール ETF ───
+      {id:'p3', code:'QYLD', name:'グローバルX NASDAQ100 カバードコールETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:167, purchasePrice:2793, currentPrice:2783, dividend:322.63,
+       revenueTrend:0, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'高分配カバードコールETF。配当利回り11.59%。NAV逓減に注意。年利12.83%', updatedAt:'2026-04-02'},
+
+      {id:'p4', code:'QYLG', name:'グローバルX NASDAQ100 & カバードコールETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:150, purchasePrice:6914, currentPrice:6975, dividend:1222,
+       revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'カバードコール50%＋指数50%。配当利回り17.52%。株数・単価は要確認', updatedAt:'2026-04-02'},
+
+      // ─── 新興国・フロンティア ───
+      {id:'p2', code:'FM',   name:'iシェアーズ MSCI フロンティア ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
+       shares:2, purchasePrice:7500, currentPrice:7500, dividend:0,
+       revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'フロンティア市場ETF。配当なし。取得単価・現在値は要確認', updatedAt:'2026-04-02'},
+
+      // ─── 個別株（米国） ───
+      {id:'p15', code:'ARCC', name:'エイリス・キャピタル（Ares Capital）',
+       market:'us', sector:'その他金融', category:'other',
+       shares:5, purchasePrice:2364, currentPrice:2951, dividend:303.10,
+       revenueTrend:1, epsTrend:1, opMargin:50, equityRatio:30, cfTrend:1, cashTrend:1, divTrend:1, payoutRatio:90,
+       memo:'BDC（ビジネス開発会社）。配当利回り約10.3%。月次配当。評価益あり', updatedAt:'2026-04-02'},
+
+      // ─── レバレッジETF（ウォッチ中・非保有） ───
+      {id:'p10', code:'SOXL', name:'Direxion デイリー半導体株ブル3倍ETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:0, purchasePrice:0, currentPrice:8417, dividend:22.93,
+       revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'半導体3倍ブルETF。現在未保有・ウォッチ中', updatedAt:'2026-04-02'},
+
+      {id:'p11', code:'TECL', name:'Direxion デイリーテクノロジー株ブル3倍ETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
+       shares:0, purchasePrice:0, currentPrice:16173, dividend:666.73,
+       revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
+       memo:'テクノロジー3倍ブルETF。現在未保有・ウォッチ中', updatedAt:'2026-04-02'},
+    ];
+    saveData();
+  }
+}
+
+function saveData() {
+  localStorage.setItem('haikaitoDatabase_v3', JSON.stringify({
+    stocks: state.stocks,
+    watchlist: state.watchlist || []
+  }));
+}
+
+// ==================== REALTIME PRICE FETCH ====================
+async function fetchPrices() {
+  if (state.fetchStatus === 'loading') return;
+  state.fetchStatus = 'loading';
+  updateFetchStatusUI();
+
+  try {
+    const fxUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/USDJPY%3DX?interval=1d&range=1d';
+    const proxy = url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    let usdJpy = state.usdJpy || 150;
+    try {
+      const fxRes = await fetch(proxy(fxUrl));
+      const fxJson = await fxRes.json();
+      const fxData = JSON.parse(fxJson.contents);
+      usdJpy = fxData?.chart?.result?.[0]?.meta?.regularMarketPrice || usdJpy;
+      state.usdJpy = usdJpy;
+    } catch(e) { /* FXレートは前回値を使用 */ }
+
+    const holdingCodes = state.stocks.map(s => {
+      if (s.market === 'japan') return s.code.replace(/\.T$/, '') + '.T';
+      if (s.market === 'us') return s.code;
+      return null;
+    }).filter(Boolean);
+    const watchCodes = (state.watchlist || []).map(w => {
+      if (w.market === 'japan') return w.code.replace(/\.T$/, '') + '.T';
+      return w.code;
+    });
+    const allCodes = [...new Set([...holdingCodes, ...watchCodes])];
+    if (!allCodes.length) { state.fetchStatus = 'done'; updateFetchStatusUI(); return; }
+
+    const symbolsParam = allCodes.join(',');
+    const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}&lang=ja&region=JP`;
+    const res = await fetch(proxy(quoteUrl));
+    const json = await res.json();
+    const data = JSON.parse(json.contents);
+    const quotes = data?.quoteResponse?.result || [];
+    const quoteMap = {};
+    quotes.forEach(q => { quoteMap[q.symbol] = q; });
+
+    let updated = 0;
+    state.stocks.forEach(s => {
+      const sym = s.market === 'japan' ? s.code.replace(/\.T$/, '') + '.T' : s.code;
+      const q = quoteMap[sym];
+      if (!q) return;
+      const marketPrice = q.regularMarketPrice;
+      if (!marketPrice) return;
+      s.currentPrice = s.market === 'us' ? Math.round(marketPrice * usdJpy) : Math.round(marketPrice);
+      if (q.trailingAnnualDividendRate && q.trailingAnnualDividendRate > 0) {
+        s.dividend = s.market === 'us'
+          ? Math.round(q.trailingAnnualDividendRate * usdJpy * 100) / 100
+          : Math.round(q.trailingAnnualDividendRate * 100) / 100;
+      }
+      s.updatedAt = new Date().toISOString().split('T')[0];
+      updated++;
+    });
+
+    (state.watchlist || []).forEach(w => {
+      const sym = w.market === 'japan' ? w.code.replace(/\.T$/, '') + '.T' : w.code;
+      const q = quoteMap[sym];
+      if (!q) return;
+      const mp = q.regularMarketPrice;
+      w.currentPrice = w.market === 'us' ? Math.round(mp * usdJpy) : Math.round(mp);
+      w.dividendYield = (q.trailingAnnualDividendYield || 0) * 100;
+      w.pbr = q.priceToBook || 0;
+      w.name = w.name || q.longName || q.shortName || w.code;
+    });
+
+    saveData();
+    state.lastFetchTime = new Date();
+    state.fetchStatus = 'done';
+    updateFetchStatusUI();
+    refreshAll();
+
+    checkScreeningAlerts(quoteMap, usdJpy);
+
+    if (updated > 0) showToast(`✅ ${updated}銘柄の株価を更新しました（1USD = ¥${usdJpy.toFixed(1)}）`);
+
+  } catch(err) {
+    state.fetchStatus = 'error';
+    updateFetchStatusUI();
+    showToast('❌ 価格取得に失敗しました。ネットワーク接続を確認してください。');
+    console.error('fetchPrices error:', err);
+  }
+}
+
+function updateFetchStatusUI() {
+  const btn = document.getElementById('refresh-btn');
+  const statusEl = document.getElementById('fetch-status');
+  if (!btn) return;
+  if (state.fetchStatus === 'loading') {
+    btn.textContent = '⏳ 更新中...';
+    btn.disabled = true;
+  } else {
+    btn.textContent = '🔄 株価更新';
+    btn.disabled = false;
+  }
+  if (statusEl) {
+    if (state.lastFetchTime) {
+      const t = state.lastFetchTime;
+      statusEl.textContent = `最終更新: ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}  1USD=¥${(state.usdJpy||150).toFixed(1)}`;
+    } else {
+      statusEl.textContent = '未取得';
+    }
+  }
+}
+
+function setAutoRefresh(minutes) {
+  if (state.autoRefreshInterval) clearInterval(state.autoRefreshInterval);
+  state.autoRefreshInterval = null;
+  const el = document.getElementById('auto-refresh-status');
+  if (el) el.textContent = minutes > 0 ? `${minutes}分ごと自動更新中` : '自動更新オフ';
+  if (minutes > 0) {
+    state.autoRefreshInterval = setInterval(() => fetchPrices(), minutes * 60 * 1000);
+  }
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('toast-msg');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-msg';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .3s';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+}
+
+// ==================== SCORE ====================
+function calculateScore(s) {
+  let pts = {};
+  pts.revenue = Math.max(0, (s.revenueTrend + 2) * 2.5);       // 0-10
+  pts.eps = Math.max(0, (s.epsTrend + 2) * 5);                  // 0-20
+  const om = parseFloat(s.opMargin) || 0;
+  pts.opMargin = om >= 15 ? 15 : om >= 10 ? 12 : om >= 7 ? 8 : om >= 5 ? 4 : om === 0 ? 8 : 0; // 0-15, 0 means ETF
+  const er = parseFloat(s.equityRatio) || 0;
+  pts.equity = er >= 80 ? 15 : er >= 60 ? 13 : er >= 50 ? 10 : er >= 40 ? 7 : er >= 20 ? 3 : er === 0 ? 8 : 0;
+  pts.cf = Math.max(0, (s.cfTrend + 2) * 3.75);                 // 0-15
+  pts.cash = Math.max(0, (s.cashTrend + 2) * 1.25);             // 0-5
+  pts.dividend = Math.max(0, (s.divTrend + 2) * 2.5);           // 0-10
+  const pr = parseFloat(s.payoutRatio) || 0;
+  pts.payout = (pr >= 30 && pr <= 50) ? 10 : (pr > 50 && pr <= 70) ? 6 : (pr > 70 && pr <= 80) ? 2 : (pr < 30 && pr >= 15) ? 7 : pr === 0 ? 7 : 0;
+  // こびと株10条件追加スコア
+  const pbr = parseFloat(s.pbr) || 0;
+  pts.pbr = (pbr >= 0.5 && pbr <= 1.5) ? 12 : (pbr > 0 && pbr < 0.5) ? 6 : (pbr > 1.5 && pbr <= 2.0) ? 6 : pbr === 0 ? 5 : 0;
+  const cr = parseFloat(s.currentRatio) || 0;
+  pts.currentRatio = cr >= 200 ? 12 : cr >= 150 ? 7 : cr >= 100 ? 3 : cr === 0 ? 5 : 0;
+  const div = parseFloat(s.dividend) || 0;
+  const cp = parseFloat(s.currentPrice) || 0;
+  const yld = (cp > 0 && div > 0) ? div / cp * 100 : 0;
+  pts.divYield = div === 0 ? 0 : yld >= 3.75 ? 10 : yld >= 3.0 ? 6 : yld >= 2.0 ? 3 : 0;
+  // 増配率スコア（3年平均・5年平均）
+  const dg3 = parseFloat(s.divGrowth3Y) || 0;
+  const dg5 = parseFloat(s.divGrowth5Y) || 0;
+  const dgBest = Math.max(dg3, dg5);
+  pts.divGrowth = dgBest >= 10 ? 15 : dgBest >= 7 ? 12 : dgBest >= 5 ? 10 : dgBest >= 3 ? 7 : dgBest >= 1 ? 4 : dgBest === 0 ? 5 : 0;
+  // 連続増配年数スコア
+  const consYrs = parseFloat(s.consecutiveDivYrs) || 0;
+  pts.consecutive = consYrs >= 20 ? 15 : consYrs >= 10 ? 12 : consYrs >= 5 ? 8 : consYrs >= 3 ? 5 : consYrs >= 1 ? 3 : consYrs === 0 ? 4 : 0;
+  const total = Object.values(pts).reduce((a,b) => a+b, 0);
+  return {total: Math.round(total), pts};
+}
+
+function scoreGrade(total) {
+  if (total >= 130) return {grade:'S',label:'優良銘柄',cls:'score-s'};
+  if (total >= 105) return {grade:'A',label:'良好',cls:'score-a'};
+  if (total >= 65)  return {grade:'B',label:'標準',cls:'score-b'};
+  if (total >= 45)  return {grade:'C',label:'要注意',cls:'score-c'};
+  return {grade:'D',label:'要再検討',cls:'score-d'};
+}
+
+// ==================== PORTFOLIO STATS ====================
+function getStats() {
+  const stocks = state.stocks;
+  if (!stocks.length) return null;
+  let totalInvest = 0, totalCurrent = 0, totalAnnualDiv = 0;
+  let defensiveDivTotal = 0;
+  const sectorDiv = {}, sectorInvest = {};
+
+  stocks.forEach(s => {
+    const shares = parseFloat(s.shares) || 0;
+    const pp = parseFloat(s.purchasePrice) || 0;
+    const cp = parseFloat(s.currentPrice) || 0;
+    const div = parseFloat(s.dividend) || 0;
+    const invest = shares * pp;
+    const current = shares * cp;
+    const annualDiv = shares * div;
+
+    totalInvest += invest;
+    totalCurrent += current;
+    totalAnnualDiv += annualDiv;
+    if (s.category === 'defensive') defensiveDivTotal += annualDiv;
+    sectorDiv[s.sector] = (sectorDiv[s.sector] || 0) + annualDiv;
+    sectorInvest[s.sector] = (sectorInvest[s.sector] || 0) + invest;
+  });
+
+  const pl = totalCurrent - totalInvest;
+  const plRate = totalInvest > 0 ? (pl / totalInvest * 100) : 0;
+  const yieldRate = totalCurrent > 0 ? (totalAnnualDiv / totalCurrent * 100) : 0;
+  const defRatio = totalAnnualDiv > 0 ? (defensiveDivTotal / totalAnnualDiv * 100) : 0;
+
+  return {
+    count: stocks.length, totalInvest, totalCurrent, pl, plRate,
+    totalAnnualDiv, yieldRate, defRatio, sectorDiv, sectorInvest
+  };
+}
+
+function getAlerts(stats) {
+  const alerts = [];
+  if (!stats || !state.stocks.length) return alerts;
+
+  // Sector > 20%
+  const sectors = Object.keys(stats.sectorInvest);
+  sectors.forEach(sec => {
+    const ratio = stats.totalInvest > 0 ? stats.sectorInvest[sec] / stats.totalInvest * 100 : 0;
+    if (ratio > 20) {
+      alerts.push({type:'warn', icon:'⚠️', msg:`【セクター集中】${sec} が投資額全体の ${ratio.toFixed(1)}% を超えています（上限：20%）`});
+    }
+  });
+
+  // Single stock div > 3%
+  state.stocks.forEach(s => {
+    const annualDiv = (parseFloat(s.shares)||0) * (parseFloat(s.dividend)||0);
+    const ratio = stats.totalAnnualDiv > 0 ? annualDiv / stats.totalAnnualDiv * 100 : 0;
+    if (ratio > 3 && state.stocks.length >= 5) {
+      alerts.push({type:'warn', icon:'⚠️', msg:`【配当集中】${s.name}（${s.code}）からの配当が全体の ${ratio.toFixed(1)}% です（上限：3%）`});
+    }
+  });
+
+  // Defensive < 50%
+  if (stats.defRatio < 50 && state.stocks.length >= 3) {
+    alerts.push({type:'danger', icon:'🛡️', msg:`【守備力低下】ディフェンシブ銘柄の配当比率が ${stats.defRatio.toFixed(1)}% です（目標：50%以上）`});
+  }
+
+  // Count < 50
+  if (state.stocks.length < 10) {
+    alerts.push({type:'info', icon:'📊', msg:`【分散不足】現在 ${state.stocks.length} 銘柄です。目標は50銘柄以上。少額・1株単位で積み上げましょう。`});
+  }
+
+  // Nanpin signals
+  state.stocks.forEach(s => {
+    const pp = parseFloat(s.purchasePrice) || 0;
+    const cp = parseFloat(s.currentPrice) || 0;
+    if (pp > 0 && cp > 0) {
+      const drop = (pp - cp) / pp * 100;
+      if (drop >= 40) {
+        alerts.push({type:'danger', icon:'📉', msg:`【ナンピン2回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（2回目の買い増しタイミング）`});
+      } else if (drop >= 20) {
+        alerts.push({type:'warn', icon:'📉', msg:`【ナンピン1回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（1回目の買い増しタイミング）`});
+      }
+    }
+  });
+
+  return alerts;
+}
+
+// ==================== RENDER DASHBOARD ====================
+function renderDashboard() {
+  const stats = getStats();
+  const grid = document.getElementById('stat-grid');
+
+  if (!stats) {
+    grid.innerHTML = '<p class="empty-state" style="grid-column:1/-1"><p>銘柄を登録してください</p></p>';
+    document.getElementById('alerts-list').innerHTML = '<div class="no-alerts">✅ 銘柄を登録するとアラートが表示されます</div>';
+    renderCharts(null);
+    return;
+  }
+
+  const fmt = n => n.toLocaleString('ja-JP', {style:'currency',currency:'JPY',maximumFractionDigits:0});
+  const fmtN = n => n.toLocaleString('ja-JP',{maximumFractionDigits:0});
+  const plCls = stats.pl >= 0 ? 'good' : 'bad';
+  const defCls = stats.defRatio >= 50 ? 'good' : stats.defRatio >= 35 ? 'warn' : 'bad';
+
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="label">保有銘柄数</div>
+      <div class="value">${stats.count}<small style="font-size:12px;font-weight:400"> 銘柄</small></div>
+      <div class="sub">目標：50銘柄以上</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">総投資額</div>
+      <div class="value" style="font-size:17px">${fmt(stats.totalInvest)}</div>
+      <div class="sub">現在評価額 ${fmt(stats.totalCurrent)}</div>
+    </div>
+    <div class="stat-card ${plCls}">
+      <div class="label">含み損益</div>
+      <div class="value" style="font-size:17px">${stats.pl >= 0 ? '+' : ''}${fmt(stats.pl)}</div>
+      <div class="sub">${stats.pl >= 0 ? '+' : ''}${stats.plRate.toFixed(1)}%</div>
+    </div>
+    <div class="stat-card good">
+      <div class="label">年間配当金（予想）</div>
+      <div class="value" style="font-size:17px">${fmt(stats.totalAnnualDiv)}</div>
+      <div class="sub">月換算 ${fmt(stats.totalAnnualDiv/12)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">平均配当利回り</div>
+      <div class="value">${stats.yieldRate.toFixed(2)}<small style="font-size:12px;font-weight:400">%</small></div>
+      <div class="sub">目安：3〜4%</div>
+    </div>
+    <div class="stat-card ${defCls}">
+      <div class="label">ディフェンシブ比率</div>
+      <div class="value">${stats.defRatio.toFixed(1)}<small style="font-size:12px;font-weight:400">%</small></div>
+      <div class="sub">目標：50%以上</div>
+    </div>
+  `;
+
+  const alerts = getAlerts(stats);
+  const alertsEl = document.getElementById('alerts-list');
+  if (alerts.length === 0) {
+    alertsEl.innerHTML = '<div class="no-alerts">✅ すべてのルールを満たしています！</div>';
+  } else {
+    alertsEl.innerHTML = '<div class="alerts-list">' + alerts.map(a =>
+      `<div class="alert-item ${a.type}"><span class="alert-icon">${a.icon}</span>${a.msg}</div>`
+    ).join('') + '</div>';
+  }
+
+  document.getElementById('header-summary').textContent =
+    `${stats.count}銘柄 / 年間配当 ${fmt(stats.totalAnnualDiv)}`;
+
+  renderCharts(stats);
+}
+
+// ==================== CHARTS ====================
+function renderCharts(stats) {
+  destroyCharts();
+  if (!stats) return;
+
+  // Sector donut
+  const secKeys = Object.keys(stats.sectorDiv).filter(k => stats.sectorDiv[k] > 0);
+  const secVals = secKeys.map(k => Math.round(stats.sectorDiv[k]));
+  const secColors = secKeys.map((_, i) => SECTOR_COLORS[i % SECTOR_COLORS.length]);
+  const ctx1 = document.getElementById('chart-sector').getContext('2d');
+  if (secKeys.length) {
+    charts.sector = new Chart(ctx1, {
+      type: 'doughnut',
+      data: {labels: secKeys, datasets: [{data: secVals, backgroundColor: secColors, borderWidth: 1}]},
+      options: {responsive:true, plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+    });
+  } else {
+    ctx1.canvas.parentElement.innerHTML += '<div class="no-data">データなし</div>';
+  }
+
+  // Def vs Cyclical
+  let defDiv = 0, cycDiv = 0, othDiv = 0;
+  state.stocks.forEach(s => {
+    const d = (parseFloat(s.shares)||0) * (parseFloat(s.dividend)||0);
+    if (s.category === 'defensive') defDiv += d;
+    else if (s.category === 'cyclical') cycDiv += d;
+    else othDiv += d;
+  });
+  const ctx2 = document.getElementById('chart-type').getContext('2d');
+  charts.type = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['ディフェンシブ', '景気敏感', 'その他'],
+      datasets: [{
+        data: [Math.round(defDiv), Math.round(cycDiv), Math.round(othDiv)],
+        backgroundColor: ['#2e86ab','#e07b39','#7f8c8d'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive:true,
+      plugins:{
+        legend:{position:'right',labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{label: ctx => `${ctx.label}: ¥${ctx.raw.toLocaleString()}`}}
+      }
+    }
+  });
+
+  // Top dividends bar
+  const sorted = [...state.stocks]
+    .map(s => ({name:s.name, div:(parseFloat(s.shares)||0)*(parseFloat(s.dividend)||0)}))
+    .filter(x => x.div > 0)
+    .sort((a,b) => b.div - a.div)
+    .slice(0, 10);
+  const ctx3 = document.getElementById('chart-top-div').getContext('2d');
+  if (sorted.length) {
+    charts.topDiv = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(x => x.name),
+        datasets: [{
+          label: '年間配当（円）',
+          data: sorted.map(x => Math.round(x.div)),
+          backgroundColor: '#2d7dd2',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {legend:{display:false}},
+        scales: {x:{ticks:{font:{size:10},callback: v => '¥'+v.toLocaleString()}}, y:{ticks:{font:{size:10}}}}
+      }
+    });
+  }
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => c && c.destroy());
+  charts = {};
+}
+
+// ==================== PORTFOLIO TABLE ====================
+let sortKey = null, sortDir = 1;
+
+function sortTable(th) {
+  const key = th.dataset.sort;
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+  th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  renderPortfolio();
+}
+
+function renderPortfolio() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filterSec = document.getElementById('filter-sector').value;
+  const filterType = document.getElementById('filter-type').value;
+  const filterMkt = document.getElementById('filter-market').value;
+
+  let stocks = [...state.stocks].filter(s => {
+    if (search && !s.name.toLowerCase().includes(search) && !s.code.toLowerCase().includes(search)) return false;
+    if (filterSec && s.sector !== filterSec) return false;
+    if (filterType && s.category !== filterType) return false;
+    if (filterMkt && s.market !== filterMkt) return false;
+    return true;
+  });
+
+  if (sortKey) {
+    stocks.sort((a, b) => {
+      let av, bv;
+      if (sortKey === 'pl') {
+        av = ((parseFloat(a.currentPrice)||0)-(parseFloat(a.purchasePrice)||0))*(parseFloat(a.shares)||0);
+        bv = ((parseFloat(b.currentPrice)||0)-(parseFloat(b.purchasePrice)||0))*(parseFloat(b.shares)||0);
+      } else if (sortKey === 'yield') {
+        av = (parseFloat(a.currentPrice)||0) > 0 ? (parseFloat(a.dividend)||0)/(parseFloat(a.currentPrice)||0)*100 : 0;
+        bv = (parseFloat(b.currentPrice)||0) > 0 ? (parseFloat(b.dividend)||0)/(parseFloat(b.currentPrice)||0)*100 : 0;
+      } else if (sortKey === 'annualDiv') {
+        av = (parseFloat(a.shares)||0) * (parseFloat(a.dividend)||0);
+        bv = (parseFloat(b.shares)||0) * (parseFloat(b.dividend)||0);
+      } else if (sortKey === 'score') {
+        av = calculateScore(a).total; bv = calculateScore(b).total;
+      } else {
+        av = parseFloat(a[sortKey])||0; bv = parseFloat(b[sortKey])||0;
+      }
+      return (av - bv) * sortDir;
+    });
+  }
+
+  const tbody = document.getElementById('portfolio-tbody');
+  const empty = document.getElementById('portfolio-empty');
+
+  if (!stocks.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = stocks.map(s => {
+    const shares = parseFloat(s.shares)||0;
+    const pp = parseFloat(s.purchasePrice)||0;
+    const cp = parseFloat(s.currentPrice)||0;
+    const div = parseFloat(s.dividend)||0;
+    const pl = (cp - pp) * shares;
+    const plRate = pp > 0 ? (cp - pp) / pp * 100 : 0;
+    const yld = cp > 0 ? div / cp * 100 : 0;
+    const annualDiv = shares * div;
+    const score = calculateScore(s);
+    const grade = scoreGrade(score.total);
+    const dropPct = pp > 0 ? (pp - cp) / pp * 100 : 0;
+    const nanpin = dropPct >= 40 ? `<span class="nanpin-btn nanpin-2">2回目▼${dropPct.toFixed(0)}%</span>`
+                 : dropPct >= 20 ? `<span class="nanpin-btn nanpin-1">1回目▼${dropPct.toFixed(0)}%</span>` : '';
+    const mktBadge = s.market === 'japan' ? '<span class="market-badge market-jp">日本</span>' : s.market === 'us' ? '<span class="market-badge market-us">米国</span>' : '';
+    const typeBadge = s.category === 'defensive' ? '<span class="def-badge">守備</span>' : s.category === 'cyclical' ? '<span class="cyc-badge">景気</span>' : '';
+    return `<tr>
+      <td><strong>${s.code}</strong></td>
+      <td>${s.name}</td>
+      <td>${mktBadge}</td>
+      <td style="font-size:12px">${s.sector}</td>
+      <td>${typeBadge}</td>
+      <td>${shares.toLocaleString()}</td>
+      <td>¥${pp.toLocaleString()}</td>
+      <td>¥${cp.toLocaleString()}</td>
+      <td class="${pl >= 0 ? 'pl-positive' : 'pl-negative'}">${pl >= 0 ? '+' : ''}¥${Math.round(pl).toLocaleString()}<small style="font-size:10px;margin-left:2px">(${plRate >= 0 ? '+' : ''}${plRate.toFixed(1)}%)</small></td>
+      <td>${yld.toFixed(2)}%</td>
+      <td>¥${Math.round(annualDiv).toLocaleString()}</td>
+      <td><span class="score-badge ${grade.cls}" title="${grade.label}">${grade.grade}</span><small style="font-size:10px;margin-left:4px">${score.total}</small></td>
+      <td>${nanpin}</td>
+      <td>
+        <button class="action-btn" onclick="openEditModal('${s.id}')" title="編集">✏️</button>
+        <button class="action-btn" onclick="confirmDelete('${s.id}','${s.name}')" title="削除">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Populate sector filter
+  const secSel = document.getElementById('filter-sector');
+  const curVal = secSel.value;
+  const allSecs = [...new Set(state.stocks.map(s => s.sector))].sort();
+  secSel.innerHTML = '<option value="">すべてのセクター</option>' + allSecs.map(s => `<option value="${s}">${s}</option>`).join('');
+  secSel.value = curVal;
+}
+
+// ==================== MODAL ====================
+function openAddModal() {
+  state.editingId = null;
+  document.getElementById('modal-title').textContent = '銘柄を追加';
+  resetForm();
+  document.getElementById('stock-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const s = state.stocks.find(x => x.id === id);
+  if (!s) return;
+  state.editingId = id;
+  document.getElementById('modal-title').textContent = '銘柄を編集：' + s.name;
+  resetForm();
+  document.getElementById('f-id').value = s.id;
+  document.getElementById('f-code').value = s.code || '';
+  document.getElementById('f-name').value = s.name || '';
+  document.getElementById('f-market').value = s.market || 'japan';
+  document.getElementById('f-sector').value = s.sector || '';
+  document.getElementById('f-category').value = s.category || 'other';
+  document.getElementById('f-shares').value = s.shares || '';
+  document.getElementById('f-purchase-price').value = s.purchasePrice || '';
+  document.getElementById('f-current-price').value = s.currentPrice || '';
+  document.getElementById('f-dividend').value = s.dividend || '';
+  document.getElementById('f-op-margin').value = s.opMargin || '';
+  document.getElementById('f-equity-ratio').value = s.equityRatio || '';
+  document.getElementById('f-payout').value = s.payoutRatio || '';
+  document.getElementById('f-pbr').value = s.pbr || '';
+  document.getElementById('f-current-ratio').value = s.currentRatio || '';
+  document.getElementById('f-div-growth3y').value = s.divGrowth3Y || '';
+  document.getElementById('f-div-growth5y').value = s.divGrowth5Y || '';
+  document.getElementById('f-consecutive-yrs').value = s.consecutiveDivYrs || '';
+  document.getElementById('f-memo').value = s.memo || '';
+  const setRadio = (name, val) => {
+    const r = document.querySelector(`input[name="${name}"][value="${val}"]`);
+    if (r) r.checked = true;
+  };
+  setRadio('rev', s.revenueTrend ?? 0);
+  setRadio('eps', s.epsTrend ?? 0);
+  setRadio('cf', s.cfTrend ?? 0);
+  setRadio('cash', s.cashTrend ?? 0);
+  setRadio('divt', s.divTrend ?? 0);
+  document.getElementById('stock-modal').classList.add('open');
+}
+
+function resetForm() {
+  document.getElementById('f-id').value = '';
+  ['f-code','f-name','f-shares','f-purchase-price','f-current-price','f-dividend',
+   'f-op-margin','f-equity-ratio','f-payout','f-pbr','f-current-ratio',
+   'f-div-growth3y','f-div-growth5y','f-consecutive-yrs','f-memo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-market').value = 'japan';
+  document.getElementById('f-category').value = 'defensive';
+  document.getElementById('f-sector').value = '';
+  ['rev','eps','cf','cash','divt'].forEach(name => {
+    const r = document.querySelector(`input[name="${name}"][value="0"]`);
+    if (r) r.checked = true;
+  });
+}
+
+function closeModal() {
+  document.getElementById('stock-modal').classList.remove('open');
+  state.editingId = null;
+}
+
+function saveStock() {
+  const code = document.getElementById('f-code').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  if (!code || !name) { alert('コードと銘柄名は必須です'); return; }
+
+  const getRadio = name => {
+    const r = document.querySelector(`input[name="${name}"]:checked`);
+    return r ? parseInt(r.value) : 0;
+  };
+
+  const stock = {
+    id: state.editingId || ('s' + Date.now()),
+    code, name,
+    market: document.getElementById('f-market').value,
+    sector: document.getElementById('f-sector').value,
+    category: document.getElementById('f-category').value,
+    shares: parseFloat(document.getElementById('f-shares').value) || 0,
+    purchasePrice: parseFloat(document.getElementById('f-purchase-price').value) || 0,
+    currentPrice: parseFloat(document.getElementById('f-current-price').value) || 0,
+    dividend: parseFloat(document.getElementById('f-dividend').value) || 0,
+    revenueTrend: getRadio('rev'),
+    epsTrend: getRadio('eps'),
+    opMargin: parseFloat(document.getElementById('f-op-margin').value) || 0,
+    equityRatio: parseFloat(document.getElementById('f-equity-ratio').value) || 0,
+    cfTrend: getRadio('cf'),
+    cashTrend: getRadio('cash'),
+    divTrend: getRadio('divt'),
+    payoutRatio: parseFloat(document.getElementById('f-payout').value) || 0,
+    pbr: parseFloat(document.getElementById('f-pbr').value) || 0,
+    currentRatio: parseFloat(document.getElementById('f-current-ratio').value) || 0,
+    divGrowth3Y: parseFloat(document.getElementById('f-div-growth3y').value) || 0,
+    divGrowth5Y: parseFloat(document.getElementById('f-div-growth5y').value) || 0,
+    consecutiveDivYrs: parseFloat(document.getElementById('f-consecutive-yrs').value) || 0,
+    memo: document.getElementById('f-memo').value.trim(),
+    updatedAt: new Date().toISOString().slice(0,10)
+  };
+
+  if (state.editingId) {
+    const idx = state.stocks.findIndex(x => x.id === state.editingId);
+    if (idx >= 0) state.stocks[idx] = stock;
+  } else {
+    state.stocks.push(stock);
+  }
+
+  saveData();
+  closeModal();
+  refreshAll();
+}
+
+// ==================== DELETE ====================
+function confirmDelete(id, name) {
+  document.getElementById('confirm-msg').textContent = `「${name}」を削除しますか？`;
+  const overlay = document.getElementById('confirm-overlay');
+  overlay.classList.add('open');
+  document.getElementById('confirm-ok').onclick = () => {
+    state.stocks = state.stocks.filter(s => s.id !== id);
+    saveData();
+    closeConfirm();
+    refreshAll();
+  };
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+}
+
+// ==================== SCREENING ====================
+function initScreeningForm() {
+  const container = document.getElementById('screening-form-content');
+  container.innerHTML = `
+    <div class="form-grid">
+      <div class="form-group">
+        <label>① 売上高トレンド</label>
+        <div class="trend-select">
+          <input type="radio" name="sc-rev" id="screv--2" value="-2"><label for="screv--2">急下落</label>
+          <input type="radio" name="sc-rev" id="screv--1" value="-1"><label for="screv--1">下落</label>
+          <input type="radio" name="sc-rev" id="screv-0" value="0" checked><label for="screv-0">横ばい</label>
+          <input type="radio" name="sc-rev" id="screv-1" value="1"><label for="screv-1">上昇</label>
+          <input type="radio" name="sc-rev" id="screv-2" value="2"><label for="screv-2">急上昇</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>② EPS（1株利益）トレンド ★最重要</label>
+        <div class="trend-select">
+          <input type="radio" name="sc-eps" id="sceps--2" value="-2"><label for="sceps--2">急下落</label>
+          <input type="radio" name="sc-eps" id="sceps--1" value="-1"><label for="sceps--1">下落</label>
+          <input type="radio" name="sc-eps" id="sceps-0" value="0" checked><label for="sceps-0">横ばい</label>
+          <input type="radio" name="sc-eps" id="sceps-1" value="1"><label for="sceps-1">上昇</label>
+          <input type="radio" name="sc-eps" id="sceps-2" value="2"><label for="sceps-2">急上昇</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>③ 営業利益率（%）</label>
+        <input type="number" id="sc-om" placeholder="例：12.5" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>④ 自己資本比率（%）</label>
+        <input type="number" id="sc-er" placeholder="例：55.0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>⑤ 営業キャッシュフロー</label>
+        <div class="trend-select">
+          <input type="radio" name="sc-cf" id="sccf--2" value="-2"><label for="sccf--2">赤字多</label>
+          <input type="radio" name="sc-cf" id="sccf--1" value="-1"><label for="sccf--1">不安定</label>
+          <input type="radio" name="sc-cf" id="sccf-0" value="0" checked><label for="sccf-0">横ばい</label>
+          <input type="radio" name="sc-cf" id="sccf-1" value="1"><label for="sccf-1">黒字</label>
+          <input type="radio" name="sc-cf" id="sccf-2" value="2"><label for="sccf-2">増加中</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>⑥ 現金等の推移</label>
+        <div class="trend-select">
+          <input type="radio" name="sc-cash" id="sccash--2" value="-2"><label for="sccash--2">急減少</label>
+          <input type="radio" name="sc-cash" id="sccash--1" value="-1"><label for="sccash--1">減少</label>
+          <input type="radio" name="sc-cash" id="sccash-0" value="0" checked><label for="sccash-0">横ばい</label>
+          <input type="radio" name="sc-cash" id="sccash-1" value="1"><label for="sccash-1">増加</label>
+          <input type="radio" name="sc-cash" id="sccash-2" value="2"><label for="sccash-2">急増加</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>⑦ 配当金トレンド</label>
+        <div class="trend-select">
+          <input type="radio" name="sc-divt" id="scdivt--2" value="-2"><label for="scdivt--2">大幅減配</label>
+          <input type="radio" name="sc-divt" id="scdivt--1" value="-1"><label for="scdivt--1">減配</label>
+          <input type="radio" name="sc-divt" id="scdivt-0" value="0" checked><label for="scdivt-0">安定</label>
+          <input type="radio" name="sc-divt" id="scdivt-1" value="1"><label for="scdivt-1">増配</label>
+          <input type="radio" name="sc-divt" id="scdivt-2" value="2"><label for="scdivt-2">連続増配</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>⑧ 配当性向（%）</label>
+        <input type="number" id="sc-pr" placeholder="例：42.0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>⑨ PBR <small style="color:var(--muted)">こびと株条件</small></label>
+        <input type="number" id="sc-pbr" placeholder="例：0.8" step="0.01" min="0">
+        <span class="metric-hint">0.5〜1.5倍が理想</span>
+      </div>
+      <div class="form-group">
+        <label>⑩ 流動比率（%）<small style="color:var(--muted)">こびと株条件</small></label>
+        <input type="number" id="sc-cr" placeholder="例：220" step="1" min="0">
+        <span class="metric-hint">200%以上が理想</span>
+      </div>
+      <div class="form-group">
+        <label>現在株価（円）<small style="color:var(--muted)">利回り計算用</small></label>
+        <input type="number" id="sc-price" placeholder="例：2000" step="1" min="0">
+      </div>
+      <div class="form-group">
+        <label>年間配当（円/株）<small style="color:var(--muted)">利回り計算用</small></label>
+        <input type="number" id="sc-div" placeholder="例：80" step="0.01" min="0">
+      </div>
+    </div>`;
+}
+
+function calcScreening() {
+  const getR = name => {
+    const r = document.querySelector(`input[name="${name}"]:checked`);
+    return r ? parseInt(r.value) : 0;
+  };
+  const sc = {
+    revenueTrend: getR('sc-rev'), epsTrend: getR('sc-eps'),
+    opMargin: parseFloat(document.getElementById('sc-om').value) || 0,
+    equityRatio: parseFloat(document.getElementById('sc-er').value) || 0,
+    cfTrend: getR('sc-cf'), cashTrend: getR('sc-cash'),
+    divTrend: getR('sc-divt'),
+    payoutRatio: parseFloat(document.getElementById('sc-pr').value) || 0,
+    pbr: parseFloat(document.getElementById('sc-pbr').value) || 0,
+    currentRatio: parseFloat(document.getElementById('sc-cr').value) || 0,
+    currentPrice: parseFloat(document.getElementById('sc-price').value) || 0,
+    dividend: parseFloat(document.getElementById('sc-div').value) || 0
+  };
+  const score = calculateScore(sc);
+  const grade = scoreGrade(score.total);
+  const name = document.getElementById('sc-name').value || '（名称未入力）';
+  const code = document.getElementById('sc-code').value || '—';
+
+  const barColor = (v, max) => {
+    const pct = v / max * 100;
+    return pct >= 70 ? '#27ae60' : pct >= 40 ? '#f39c12' : '#e74c3c';
+  };
+
+  const items = [
+    {label:'① 売上高', pts: score.pts.revenue, max: 10},
+    {label:'② EPS ★', pts: score.pts.eps, max: 20},
+    {label:'③ 営業利益率', pts: score.pts.opMargin, max: 15},
+    {label:'④ 自己資本比率', pts: score.pts.equity, max: 15},
+    {label:'⑤ 営業CF', pts: score.pts.cf, max: 15},
+    {label:'⑥ 現金推移', pts: score.pts.cash, max: 5},
+    {label:'⑦ 配当トレンド', pts: score.pts.dividend, max: 10},
+    {label:'⑧ 配当性向', pts: score.pts.payout, max: 10},
+    {label:'⑨ PBR', pts: score.pts.pbr, max: 12},
+    {label:'⑩ 流動比率', pts: score.pts.currentRatio, max: 12},
+    {label:'配当利回り', pts: score.pts.divYield, max: 10},
+    {label:'⑪ 増配率(3/5年)', pts: score.pts.divGrowth, max: 15},
+    {label:'⑫ 連続増配年数', pts: score.pts.consecutive, max: 15},
+  ];
+
+  const barsHtml = items.map(item => `
+    <div class="score-bar-row">
+      <span class="bar-label">${item.label}</span>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${item.pts/item.max*100}%;background:${barColor(item.pts,item.max)}"></div></div>
+      <span class="bar-pts" style="color:${barColor(item.pts,item.max)}">${Math.round(item.pts)}/${item.max}</span>
+    </div>`).join('');
+
+  const omVal = parseFloat(document.getElementById('sc-om').value) || 0;
+  const erVal = parseFloat(document.getElementById('sc-er').value) || 0;
+  const prVal = parseFloat(document.getElementById('sc-pr').value) || 0;
+  const pbrVal = parseFloat(document.getElementById('sc-pbr').value) || 0;
+  const crVal = parseFloat(document.getElementById('sc-cr').value) || 0;
+  const priceVal = parseFloat(document.getElementById('sc-price').value) || 0;
+  const divVal = parseFloat(document.getElementById('sc-div').value) || 0;
+  const yldVal = priceVal > 0 && divVal > 0 ? divVal / priceVal * 100 : 0;
+  const checks = [
+    {ok: omVal >= 10 || omVal === 0, label:`営業利益率 ${omVal}%`, hint: omVal < 5 && omVal > 0 ? '5%未満は要注意' : omVal < 10 && omVal > 0 ? '10%以上が理想（こびと株条件）' : ''},
+    {ok: erVal >= 50 || erVal === 0, label:`自己資本比率 ${erVal}%`, hint: erVal < 40 && erVal > 0 ? '40%未満は要注意' : erVal < 50 && erVal > 0 ? '50%以上がこびと株基準' : ''},
+    {ok: prVal >= 30 && prVal <= 70 || prVal === 0, label:`配当性向 ${prVal}%`, hint: prVal > 70 ? '70%超は減配リスク大' : prVal < 30 && prVal > 0 ? '還元姿勢を要確認' : ''},
+    {ok: (pbrVal >= 0.5 && pbrVal <= 1.5) || pbrVal === 0, label:`PBR ${pbrVal}倍`, hint: pbrVal > 1.5 ? '1.5超は割高の可能性（こびと株条件外）' : pbrVal > 0 && pbrVal < 0.5 ? '0.5未満は割安すぎ・業績悪化注意' : ''},
+    {ok: crVal >= 200 || crVal === 0, label:`流動比率 ${crVal}%`, hint: crVal < 100 && crVal > 0 ? '100%未満は短期支払い能力に注意' : crVal < 200 && crVal > 0 ? '200%以上がこびと株基準' : ''},
+    {ok: yldVal >= 3.75 || yldVal === 0, label:`配当利回り ${yldVal.toFixed(2)}%`, hint: yldVal > 0 && yldVal < 3.75 ? '3.75%以上がこびと株基準（税引後3%相当）' : ''},
+  ];
+
+  const resultEl = document.getElementById('screening-result');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    <div class="screen-result">
+      <div class="score-display">
+        <div class="score-big">${score.total}</div>
+        <div class="score-info">
+          <div class="grade">${grade.grade}ランク — ${grade.label}</div>
+          <div class="verdict">${code} ${name}</div>
+          <div style="margin-top:8px;font-size:12px;opacity:.85">
+            ${score.total >= 80 ? '✅ 優良銘柄の可能性。ポートフォリオへの追加を検討できます。' :
+              score.total >= 65 ? '🟡 良好な銘柄。追加指標も合わせて確認しましょう。' :
+              score.total >= 50 ? '⚠️ 一部に懸念あり。継続的なモニタリングが必要です。' :
+              '❌ 複数の指標で基準を下回っています。再検討を推奨します。'}
+          </div>
+        </div>
+      </div>
+      <h4 style="margin-bottom:10px;font-size:13px">スコア内訳</h4>
+      ${barsHtml}
+      <div style="margin-top:14px">
+        ${checks.map(c => c.ok || c.label.includes('0%')
+          ? '' : `<div style="color:var(--danger);font-size:12px;margin-bottom:4px">⚠️ ${c.label} — ${c.hint}</div>`
+        ).join('')}
+      </div>
+    </div>`;
+
+  // Store for quick add
+  window._screeningData = sc;
+}
+
+function addFromScreening() {
+  const code = document.getElementById('sc-code').value.trim();
+  const name = document.getElementById('sc-name').value.trim();
+  if (!code || !name) { alert('コードと銘柄名を入力してください'); return; }
+  openAddModal();
+  setTimeout(() => {
+    document.getElementById('f-code').value = code;
+    document.getElementById('f-name').value = name;
+    if (window._screeningData) {
+      const setR = (rname, val) => {
+        const r = document.querySelector(`input[name="${rname}"][value="${val}"]`);
+        if (r) r.checked = true;
+      };
+      setR('rev', window._screeningData.revenueTrend);
+      setR('eps', window._screeningData.epsTrend);
+      setR('cf', window._screeningData.cfTrend);
+      setR('cash', window._screeningData.cashTrend);
+      setR('divt', window._screeningData.divTrend);
+      if (window._screeningData.opMargin) document.getElementById('f-op-margin').value = window._screeningData.opMargin;
+      if (window._screeningData.equityRatio) document.getElementById('f-equity-ratio').value = window._screeningData.equityRatio;
+      if (window._screeningData.payoutRatio) document.getElementById('f-payout').value = window._screeningData.payoutRatio;
+    }
+  }, 100);
+}
+
+// ==================== WATCHLIST ====================
+function addWatchItem() {
+  const code = document.getElementById('w-code').value.trim().toUpperCase();
+  if (!code) { showToast('証券コードを入力してください'); return; }
+  const name = document.getElementById('w-name').value.trim();
+  const market = document.getElementById('w-market').value;
+  const targetYield = parseFloat(document.getElementById('w-yield').value) || 0;
+  const targetPbr = parseFloat(document.getElementById('w-pbr').value) || 0;
+  if (!targetYield && !targetPbr) { showToast('目標利回りまたは目標PBRを設定してください'); return; }
+  if ((state.watchlist || []).find(w => w.code === code)) { showToast('すでにウォッチリストに登録済みです'); return; }
+  if (!state.watchlist) state.watchlist = [];
+  state.watchlist.push({
+    id: 'w' + Date.now(),
+    code, name: name || code, market,
+    currentPrice: 0, dividendYield: 0, pbr: 0,
+    targetYield, targetPbr, notified: false
+  });
+  saveData();
+  renderWatchlist();
+  document.getElementById('w-code').value = '';
+  document.getElementById('w-name').value = '';
+  document.getElementById('w-yield').value = '';
+  document.getElementById('w-pbr').value = '';
+  showToast(`✅ ${code} をウォッチリストに追加しました。株価更新ボタンで最新値を取得してください。`);
+}
+
+function removeWatchItem(id) {
+  state.watchlist = (state.watchlist || []).filter(w => w.id !== id);
+  saveData();
+  renderWatchlist();
+}
+
+// ==================== GAS EXPORT ====================
+function exportGasWatchlist() {
+  const list = state.watchlist || [];
+  const area = document.getElementById('gas-export-area');
+  const text = document.getElementById('gas-export-text');
+  if (!area || !text) return;
+
+  if (!list.length) {
+    showToast('ウォッチリストが空です。先に銘柄を追加してください。');
+    return;
+  }
+
+  // GAS の Config.gs に貼り付けられる形式で出力
+  const lines = list.map(w => {
+    const yld = w.targetYield || 3.75;
+    const pbr = w.targetPbr || 1.5;
+    const cool = 120;
+    const mode = (w.targetYield > 0 && w.targetPbr > 0) ? 'AND' : 'OR';
+    return [
+      `    {`,
+      `      code: '${w.code}',`,
+      `      market: '${w.market || 'japan'}',`,
+      `      targetYield: ${yld},`,
+      `      targetPbr: ${pbr},`,
+      `      conditionMode: '${mode}',`,
+      `      cooldownMinutes: ${cool}`,
+      `    }`,
+    ].join('\n');
+  });
+
+  const output = `// GAS Config.gs → getDefaultWatchlist() の return に貼り付け\n// 生成日時: ${new Date().toLocaleString('ja-JP')}\n// 銘柄数: ${list.length}件\n[\n${lines.join(',\n')}\n]`;
+
+  text.value = output;
+  area.style.display = 'block';
+  area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast(`✅ ${list.length}銘柄をエクスポートしました`);
+}
+
+function copyGasExport() {
+  const text = document.getElementById('gas-export-text');
+  if (!text) return;
+  navigator.clipboard.writeText(text.value)
+    .then(() => showToast('📋 クリップボードにコピーしました'))
+    .catch(() => {
+      text.select();
+      document.execCommand('copy');
+      showToast('📋 コピーしました');
+    });
+}
+
+function renderWatchlist() {
+  const tbody = document.getElementById('watchlist-tbody');
+  if (!tbody) return;
+  const list = state.watchlist || [];
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ウォッチ銘柄がありません。上のフォームから追加してください。</td></tr>';
+  } else {
+    tbody.innerHTML = list.map(w => {
+      const yldHit = w.targetYield > 0 && w.dividendYield >= w.targetYield;
+      const pbrHit = w.targetPbr > 0 && w.pbr > 0 && w.pbr <= w.targetPbr;
+      const alert = (yldHit || pbrHit) ? '<span style="background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">🔔 条件達成！</span>' : '<span style="color:var(--muted);font-size:12px">待機中</span>';
+      const mktBadge = w.market === 'japan' ? '<span class="market-badge market-jp">日本</span>' : '<span class="market-badge market-us">米国</span>';
+      return `<tr style="${(yldHit||pbrHit)?'background:#fff5f5':''}">
+        <td><strong>${w.code}</strong></td>
+        <td>${w.name}</td>
+        <td>${mktBadge}</td>
+        <td>${w.currentPrice > 0 ? '¥' + w.currentPrice.toLocaleString() : '—'}</td>
+        <td style="color:${yldHit?'var(--danger)':'inherit'}">${w.dividendYield > 0 ? w.dividendYield.toFixed(2) + '%' : '—'}</td>
+        <td style="color:${pbrHit?'var(--danger)':'inherit'}">${w.pbr > 0 ? w.pbr.toFixed(2) + '倍' : '—'}</td>
+        <td>${w.targetYield > 0 ? w.targetYield + '%以上' : '—'}</td>
+        <td>${w.targetPbr > 0 ? w.targetPbr + '倍以下' : '—'}</td>
+        <td>${alert}</td>
+        <td><button class="action-btn" onclick="removeWatchItem('${w.id}')" title="削除">🗑️</button></td>
+      </tr>`;
+    }).join('');
+  }
+  const notifStatus = document.getElementById('notif-status');
+  if (notifStatus) {
+    notifStatus.textContent = Notification.permission === 'granted' ? '✅ 通知: 許可済み' :
+      Notification.permission === 'denied' ? '❌ 通知: 拒否済み（ブラウザ設定から変更）' : '⚠️ 通知: 未設定（上のボタンから許可してください）';
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) { showToast('このブラウザは通知に対応していません'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    showToast('✅ 通知が許可されました');
+    const el = document.getElementById('notif-status');
+    if (el) el.textContent = '✅ 通知: 許可済み';
+  } else {
+    showToast('⚠️ 通知が拒否されました。ブラウザ設定から許可してください');
+  }
+}
+
+function sendNotification(title, body) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '🐣' });
+  }
+  showToast(`🔔 ${title}: ${body}`);
+}
+
+function checkScreeningAlerts(quoteMap, usdJpy) {
+  (state.watchlist || []).forEach(w => {
+    if (!w.targetYield && !w.targetPbr) return;
+    const yld = w.dividendYield || 0;
+    const pbr = w.pbr || 0;
+    const yldHit = w.targetYield > 0 && yld >= w.targetYield;
+    const pbrHit = w.targetPbr > 0 && pbr > 0 && pbr <= w.targetPbr;
+    if ((yldHit || pbrHit) && !w.notified) {
+      let reason = [];
+      if (yldHit) reason.push(`配当利回り${yld.toFixed(2)}% ≥ 目標${w.targetYield}%`);
+      if (pbrHit) reason.push(`PBR${pbr.toFixed(2)} ≤ 目標${w.targetPbr}`);
+      sendNotification(`🐣 購入シグナル: ${w.name || w.code}`, reason.join(' / '));
+      w.notified = true;
+    }
+    if (!yldHit && !pbrHit) w.notified = false;
+  });
+  saveData();
+  renderWatchlist();
+}
+
+// ==================== EXPORT / IMPORT ====================
+function exportData() {
+  const data = {version:2, exportDate: new Date().toISOString(), stocks: state.stocks};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `高配当株ポートフォリオ_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.stocks && Array.isArray(data.stocks)) {
+        if (confirm(`${data.stocks.length}銘柄を読み込みます。現在のデータを上書きしますか？`)) {
+          state.stocks = data.stocks;
+          saveData();
+          refreshAll();
+          alert('インポートが完了しました！');
+        }
+      } else {
+        alert('無効なファイル形式です');
+      }
+    } catch(err) {
+      alert('ファイルの読み込みに失敗しました');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ==================== TABS ====================
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'portfolio') renderPortfolio();
+  if (name === 'watchlist') renderWatchlist();
+}
+
+// ==================== INIT ====================
+function initSectorSelect() {
+  const sel = document.getElementById('f-sector');
+  sel.innerHTML = SECTORS.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+}
+
+function refreshAll() {
+  renderDashboard();
+  if (document.getElementById('tab-portfolio').classList.contains('active')) renderPortfolio();
+  if (document.getElementById('tab-watchlist').classList.contains('active')) renderWatchlist();
+}
+
+function init() {
+  loadData();
+  initSectorSelect();
+  initScreeningForm();
+  renderDashboard();
+  renderPortfolio();
+  renderWatchlist();
+
+  // Close modal on overlay click
+  document.getElementById('stock-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('stock-modal')) closeModal();
+  });
+}
+
+init();
+
+// ==================== PWA SERVICE WORKER ====================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+</script>
+</body>
+</html>
