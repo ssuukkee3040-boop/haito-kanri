@@ -214,6 +214,7 @@ textarea{resize:vertical;min-height:60px}
   <span>リベ大流</span>
   <div class="header-right">
     <span id="fetch-status" style="font-size:11px;opacity:.7"></span>
+    <span id="fx-rate-badge" style="background:rgba(255,200,50,.25);border:1px solid rgba(255,200,50,.4);border-radius:14px;padding:3px 10px;font-size:12px;font-weight:600;color:#ffd966">💱 1USD=¥150.0</span>
     <button id="refresh-btn" onclick="fetchPrices()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">🔄 株価更新</button>
     <select onchange="setAutoRefresh(+this.value)" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px;border-radius:6px;font-size:12px">
       <option value="0">手動のみ</option>
@@ -606,7 +607,7 @@ textarea{resize:vertical;min-height:60px}
             </div>
             <div class="form-group">
               <label>市場</label>
-              <select id="f-market">
+              <select id="f-market" onchange="onMarketChange()">
                 <option value="japan">日本株</option>
                 <option value="us">米国株</option>
                 <option value="other">その他</option>
@@ -642,9 +643,23 @@ textarea{resize:vertical;min-height:60px}
               <label>現在株価（円）</label>
               <input type="number" id="f-current-price" min="0" placeholder="0">
             </div>
+            <div class="form-group" id="fg-div-usd">
+              <label>年間1株配当（USD・TTM）</label>
+              <input type="number" id="f-div-usd" min="0" step="0.0001" placeholder="例: 2.16" oninput="updateDivFromUsd()">
+              <span class="metric-hint" id="div-usd-hint" style="color:var(--success)"></span>
+            </div>
             <div class="form-group">
-              <label>年間配当金（1株あたり・円）</label>
+              <label id="lbl-dividend">年間配当（円/株）</label>
               <input type="number" id="f-dividend" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>配当頻度</label>
+              <select id="f-div-frequency">
+                <option value="4">四半期（年4回）</option>
+                <option value="12">月次（年12回）</option>
+                <option value="2">半期（年2回）</option>
+                <option value="1">年次（年1回）</option>
+              </select>
             </div>
           </div>
         </div>
@@ -839,24 +854,28 @@ function loadData() {
       {id:'p1', code:'VT',   name:'バンガード・トータル・ワールドストック ETF',
        market:'us', sector:'ETF（米国）', category:'other',
        shares:37, purchasePrice:11224, currentPrice:22568, dividend:406.22,
+       divPerShareUsd:2.71, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
        memo:'全世界株ETF。配当利回り1.80%。配当予定:3月6月9月12月。年利3.53%', updatedAt:'2026-04-02'},
 
       {id:'p5', code:'VOO',  name:'バンガード S&P500 ETF',
        market:'us', sector:'ETF（米国）', category:'other',
        shares:2, purchasePrice:49031, currentPrice:98745, dividend:1115.81,
+       divPerShareUsd:7.44, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
        memo:'S&P500 ETF。配当利回り1.13%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
       {id:'p6', code:'SPLG', name:'SPDR ポートフォリオS&P500 ETF',
        market:'us', sector:'ETF（米国）', category:'other',
        shares:12, purchasePrice:19243, currentPrice:27527, dividend:308.30,
+       divPerShareUsd:2.05, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
        memo:'S&P500低コストETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
       {id:'p7', code:'VTI',  name:'バンガード・トータル・ストックマーケット ETF',
        market:'us', sector:'ETF（米国）', category:'other',
        shares:19, purchasePrice:26882, currentPrice:52946, dividend:593.00,
+       divPerShareUsd:3.95, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
        memo:'米国株式全体ETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
@@ -864,12 +883,14 @@ function loadData() {
       {id:'p8', code:'QQQ',  name:'インベスコQQQ 信託シリーズ1',
        market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:9, purchasePrice:25684, currentPrice:78306, dividend:360.21,
+       divPerShareUsd:2.40, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
        memo:'NASDAQ100 ETF。配当利回り0.46%。配当予定:3月6月9月12月。株数は概算（要確認）', updatedAt:'2026-04-02'},
 
       {id:'p9', code:'VUG',  name:'バンガード 米国グロースETF',
        market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:7, purchasePrice:35038, currentPrice:73793, dividend:317.31,
+       divPerShareUsd:2.12, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
        memo:'米国グロース株ETF。配当利回り0.43%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
@@ -877,18 +898,21 @@ function loadData() {
       {id:'p12', code:'SPYD', name:'SPDR ポートフォリオS&P500 高配当株式ETF',
        market:'us', sector:'ETF（米国）', category:'defensive',
        shares:40, purchasePrice:8098, currentPrice:7358, dividend:308.30,
+       divPerShareUsd:2.05, divFrequency:4,
        revenueTrend:1, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
        memo:'高配当S&P500 ETF。配当利回り4.19%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
       {id:'p13', code:'VYM',  name:'バンガード 米国高配当株式ETF',
        market:'us', sector:'ETF（米国）', category:'defensive',
        shares:10, purchasePrice:20420, currentPrice:16650, dividend:547.79,
+       divPerShareUsd:3.65, divFrequency:4,
        revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:2, payoutRatio:0,
        memo:'米国高配当ETF代表格。配当利回り3.29%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
       {id:'p14', code:'HDV',  name:'iシェアーズ コア米国高配当株ETF',
        market:'us', sector:'ETF（米国）', category:'defensive',
        shares:13, purchasePrice:18412, currentPrice:21444, dividend:617.44,
+       divPerShareUsd:4.12, divFrequency:4,
        revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:1, payoutRatio:0,
        memo:'米国高配当ETF。配当利回り2.88%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
@@ -896,26 +920,30 @@ function loadData() {
       {id:'p3', code:'QYLD', name:'グローバルX NASDAQ100 カバードコールETF',
        market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:167, purchasePrice:2793, currentPrice:2783, dividend:322.63,
+       divPerShareUsd:2.15, divFrequency:12,
        revenueTrend:0, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
        memo:'高分配カバードコールETF。配当利回り11.59%。NAV逓減に注意。年利12.83%', updatedAt:'2026-04-02'},
 
       {id:'p4', code:'QYLG', name:'グローバルX NASDAQ100 & カバードコールETF',
        market:'us', sector:'ETF（米国）', category:'cyclical',
-       shares:150, purchasePrice:6914, currentPrice:6975, dividend:1222,
+       shares:150, purchasePrice:6914, currentPrice:6975, dividend:225,
+       divPerShareUsd:1.50, divFrequency:12,
        revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'カバードコール50%＋指数50%。配当利回り17.52%。株数・単価は要確認', updatedAt:'2026-04-02'},
+       memo:'カバードコール50%＋指数50%。配当利回り約3.2%（TTMベース修正済）。月次配当', updatedAt:'2026-04-02'},
 
       // ─── 新興国・フロンティア ───
       {id:'p2', code:'FM',   name:'iシェアーズ MSCI フロンティア ETF',
        market:'us', sector:'ETF（米国）', category:'other',
-       shares:2, purchasePrice:7500, currentPrice:7500, dividend:0,
+       shares:2, purchasePrice:7500, currentPrice:7500, dividend:132,
+       divPerShareUsd:0.88, divFrequency:4,
        revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'フロンティア市場ETF。配当なし。取得単価・現在値は要確認', updatedAt:'2026-04-02'},
+       memo:'フロンティア市場ETF。配当利回り約1.8%（TTMベース）。取得単価・現在値は要確認', updatedAt:'2026-04-02'},
 
       // ─── 個別株（米国） ───
       {id:'p15', code:'ARCC', name:'エイリス・キャピタル（Ares Capital）',
        market:'us', sector:'その他金融', category:'other',
        shares:5, purchasePrice:2364, currentPrice:2951, dividend:303.10,
+       divPerShareUsd:2.02, divFrequency:12,
        revenueTrend:1, epsTrend:1, opMargin:50, equityRatio:30, cfTrend:1, cashTrend:1, divTrend:1, payoutRatio:90,
        memo:'BDC（ビジネス開発会社）。配当利回り約10.3%。月次配当。評価益あり', updatedAt:'2026-04-02'},
 
@@ -923,18 +951,19 @@ function loadData() {
       {id:'p10', code:'SOXL', name:'Direxion デイリー半導体株ブル3倍ETF',
        market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:0, purchasePrice:0, currentPrice:8417, dividend:22.93,
+       divPerShareUsd:0.15, divFrequency:4,
        revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
        memo:'半導体3倍ブルETF。現在未保有・ウォッチ中', updatedAt:'2026-04-02'},
 
       {id:'p11', code:'TECL', name:'Direxion デイリーテクノロジー株ブル3倍ETF',
        market:'us', sector:'ETF（米国）', category:'cyclical',
-       shares:0, purchasePrice:0, currentPrice:16173, dividend:666.73,
+       shares:0, purchasePrice:0, currentPrice:16173, dividend:60,
+       divPerShareUsd:0.40, divFrequency:4,
        revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'テクノロジー3倍ブルETF。現在未保有・ウォッチ中', updatedAt:'2026-04-02'},
+       memo:'テクノロジー3倍ブルETF。現在未保有・ウォッチ中。配当TTMベース修正済', updatedAt:'2026-04-02'},
     ];
     saveData();
 }
-
 function saveData() {
   localStorage.setItem('haikaitoDatabase_v3', JSON.stringify({
     stocks: state.stocks,
@@ -990,9 +1019,12 @@ async function fetchPrices() {
       if (!marketPrice) return;
       s.currentPrice = s.market === 'us' ? Math.round(marketPrice * usdJpy) : Math.round(marketPrice);
       if (q.trailingAnnualDividendRate && q.trailingAnnualDividendRate > 0) {
-        s.dividend = s.market === 'us'
-          ? Math.round(q.trailingAnnualDividendRate * usdJpy * 100) / 100
-          : Math.round(q.trailingAnnualDividendRate * 100) / 100;
+        if (s.market === 'us') {
+          s.divPerShareUsd = Math.round(q.trailingAnnualDividendRate * 10000) / 10000;
+          s.dividend = Math.round(q.trailingAnnualDividendRate * usdJpy * 100) / 100;
+        } else {
+          s.dividend = Math.round(q.trailingAnnualDividendRate * 100) / 100;
+        }
       }
       s.updatedAt = new Date().toISOString().split('T')[0];
       updated++;
@@ -1041,11 +1073,37 @@ function updateFetchStatusUI() {
   if (statusEl) {
     if (state.lastFetchTime) {
       const t = state.lastFetchTime;
-      statusEl.textContent = `最終更新: ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}  1USD=¥${(state.usdJpy||150).toFixed(1)}`;
+      statusEl.textContent = `最終更新: ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
     } else {
       statusEl.textContent = '未取得';
     }
   }
+  const fxBadge = document.getElementById('fx-rate-badge');
+  if (fxBadge) fxBadge.textContent = `💱 1USD=¥${(state.usdJpy||150).toFixed(1)}`;
+}
+
+// ==================== EXCHANGE RATE AUTO-FETCH ====================
+async function fetchExchangeRate() {
+  try {
+    const proxy = url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const fxUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/USDJPY%3DX?interval=1d&range=1d';
+    const res = await fetch(proxy(fxUrl), {signal: AbortSignal.timeout(8000)});
+    const json = await res.json();
+    const data = JSON.parse(json.contents);
+    const rate = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (rate && rate > 100 && rate < 200) {
+      state.usdJpy = rate;
+      state.lastFetchTime = new Date();
+      updateFetchStatusUI();
+      // Re-compute JPY dividend for all US stocks
+      state.stocks.forEach(s => {
+        if (s.market === 'us' && s.divPerShareUsd > 0) {
+          s.dividend = Math.round(s.divPerShareUsd * rate * 100) / 100;
+        }
+      });
+      saveData();
+    }
+  } catch(e) { /* フォールバック: デフォルト150円を使用 */ }
 }
 
 function setAutoRefresh(minutes) {
@@ -1070,6 +1128,28 @@ function showToast(msg) {
   toast.style.opacity = '1';
   clearTimeout(toast._timeout);
   toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+}
+
+// ==================== DIVIDEND USD HELPERS ====================
+function onMarketChange() {
+  const mkt = document.getElementById('f-market').value;
+  const isUs = (mkt === 'us');
+  const fgUsd = document.getElementById('fg-div-usd');
+  const lblDiv = document.getElementById('lbl-dividend');
+  if (fgUsd) fgUsd.style.display = isUs ? '' : 'none';
+  if (lblDiv) lblDiv.textContent = isUs ? '年間配当（円/株）← USD欄より自動計算' : '年間配当（円/株）';
+}
+
+function updateDivFromUsd() {
+  const usd = parseFloat(document.getElementById('f-div-usd').value) || 0;
+  const rate = state.usdJpy || 150;
+  if (usd > 0) {
+    const jpy = Math.round(usd * rate * 100) / 100;
+    document.getElementById('f-dividend').value = jpy;
+    document.getElementById('div-usd-hint').textContent = `→ ¥${jpy.toLocaleString('ja-JP')} （1USD=¥${rate.toFixed(1)}）`;
+  } else {
+    document.getElementById('div-usd-hint').textContent = '';
+  }
 }
 
 // ==================== SCORE ====================
@@ -1193,6 +1273,18 @@ function getAlerts(stats) {
         alerts.push({type:'danger', icon:'📉', msg:`【ナンピン2回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（2回目の買い増しタイミング）`});
       } else if (drop >= 20) {
         alerts.push({type:'warn', icon:'📉', msg:`【ナンピン1回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（1回目の買い増しタイミング）`});
+      }
+    }
+  });
+
+  // Yield sanity check
+  state.stocks.forEach(s => {
+    const div = parseFloat(s.dividend) || 0;
+    const cp = parseFloat(s.currentPrice) || 0;
+    if (div > 0 && cp > 0) {
+      const yld = div / cp * 100;
+      if (yld > 15 && s.market === 'us') {
+        alerts.push({type:'warn', icon:'⚠️', msg:`【配当要確認】${s.name}（${s.code}）の配当利回り${yld.toFixed(1)}%は異常値の可能性があります。USD/株配当を確認してください。`});
       }
     }
   });
@@ -1431,7 +1523,7 @@ function renderPortfolio() {
       <td>¥${pp.toLocaleString()}</td>
       <td>¥${cp.toLocaleString()}</td>
       <td class="${pl >= 0 ? 'pl-positive' : 'pl-negative'}">${pl >= 0 ? '+' : ''}¥${Math.round(pl).toLocaleString()}<small style="font-size:10px;margin-left:2px">(${plRate >= 0 ? '+' : ''}${plRate.toFixed(1)}%)</small></td>
-      <td>${yld.toFixed(2)}%</td>
+      <td>${yld.toFixed(2)}%<br><small style="color:var(--muted);font-size:10px">${s.divFrequency === 12 ? '月次' : s.divFrequency === 4 ? '四半期' : s.divFrequency === 2 ? '半期' : s.divFrequency === 1 ? '年次' : '四半期'}|/small></td>
       <td>¥${Math.round(annualDiv).toLocaleString()}</td>
       <td><span class="score-badge ${grade.cls}" title="${grade.label}">${grade.grade}</span><small style="font-size:10px;margin-left:4px">${score.total}</small></td>
       <td>${nanpin}</td>
@@ -1492,17 +1584,27 @@ function openEditModal(id) {
   setRadio('cf', s.cfTrend ?? 0);
   setRadio('cash', s.cashTrend ?? 0);
   setRadio('divt', s.divTrend ?? 0);
+  document.getElementById('f-div-usd').value = s.divPerShareUsd || '';
+  document.getElementById('f-div-frequency').value = s.divFrequency || 4;
+  onMarketChange(); // Show/hide USD field based on market
+  if (s.divPerShareUsd > 0) {
+    const rate = state.usdJpy || 150;
+    document.getElementById('div-usd-hint').textContent = `→ ¥${(Math.round(s.divPerShareUsd * rate * 100)/100).toLocaleString('ja-JP')} （1USD=¥${rate.toFixed(1)}）`;
+  }
   document.getElementById('stock-modal').classList.add('open');
 }
 
 function resetForm() {
   document.getElementById('f-id').value = '';
-  ['f-code','f-name','f-shares','f-purchase-price','f-current-price','f-dividend',
+  ['f-code','f-name','f-shares','f-purchase-price','f-current-price','f-dividend','f-div-usd',
    'f-op-margin','f-equity-ratio','f-payout','f-pbr','f-current-ratio',
    'f-div-growth3y','f-div-growth5y','f-consecutive-yrs','f-memo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const hint = document.getElementById('div-usd-hint');
+  if (hint) hint.textContent = '';
+  if (document.getElementById('f-div-frequency')) document.getElementById('f-div-frequency').value = '4';
   document.getElementById('f-market').value = 'japan';
   document.getElementById('f-category').value = 'defensive';
   document.getElementById('f-sector').value = '';
@@ -1537,6 +1639,8 @@ function saveStock() {
     purchasePrice: parseFloat(document.getElementById('f-purchase-price').value) || 0,
     currentPrice: parseFloat(document.getElementById('f-current-price').value) || 0,
     dividend: parseFloat(document.getElementById('f-dividend').value) || 0,
+    divPerShareUsd: parseFloat(document.getElementById('f-div-usd').value) || 0,
+    divFrequency: parseInt(document.getElementById('f-div-frequency').value) || 4,
     revenueTrend: getRadio('rev'),
     epsTrend: getRadio('eps'),
     opMargin: parseFloat(document.getElementById('f-op-margin').value) || 0,
@@ -1553,6 +1657,11 @@ function saveStock() {
     memo: document.getElementById('f-memo').value.trim(),
     updatedAt: new Date().toISOString().slice(0,10)
   };
+
+  // If US stock with USD dividend set, recompute JPY dividend
+  if (stock.market === 'us' && stock.divPerShareUsd > 0) {
+    stock.dividend = Math.round(stock.divPerShareUsd * (state.usdJpy || 150) * 100) / 100;
+  }
 
   if (state.editingId) {
     const idx = state.stocks.findIndex(x => x.id === state.editingId);
@@ -2020,6 +2129,7 @@ function init() {
 }
 
 init();
+fetchExchangeRate();
 
 // ==================== PWA SERVICE WORKER ====================
 if ('serviceWorker' in navigator) {
