@@ -4,8 +4,8 @@
 // ============================================================
 
 // ==================== 設定（必ず変更） ====================
-var TELEGRAM_TOKEN = 'YOUR_BOT_TOKEN';   // BotFatherから取得
-var TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';  // @userinfobot で確認
+var TELEGRAM_TOKEN = '8502192155:AAFh3d3srOjIw-PN45xR_Wuysa4Z_W7CMyw';   // BotFatherから取得
+var TELEGRAM_CHAT_ID = '8789739101';  // @userinfobot で確認
 
 // ==================== 監視銘柄リスト ====================
 // ウォッチリストに追加したい銘柄を手動で設定
