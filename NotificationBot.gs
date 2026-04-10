@@ -4,7 +4,7 @@
 // ============================================================
 
 // ==================== 設定（必ず変更） ====================
-var TELEGRAM_TOKEN = '8502192155:AAFh3d3srOjIw-PN45xR_Wuysa4Z_W7CMyw';   // BotFatherから取得
+var TELEGRAM_TOKEN = '8502192155:AAE_yJ_k6EEYH-U9-0xdXbbHC0lu-S96_oc';   // BotFatherから取得
 var TELEGRAM_CHAT_ID = '8789739101';  // @userinfobot で確認
 
 // ==================== 監視銘柄リスト ====================
