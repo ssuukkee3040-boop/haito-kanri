@@ -16,14 +16,34 @@ var TELEGRAM_CHAT_ID = '8789739101';  // @userinfobot で確認
 // maxPbr:   最大PBR 例: 1.5 = PBR1.5以下（0=チェックしない）
 // checkYahoo: Yahoo Financeから現在株価・配当利回りを取得するか
 var WATCHLIST = [
-  { code: 'VYM',  market: 'us',     minYield: 3.0,  maxPbr: 0, checkYahoo: true },
-  { code: 'HDV',  market: 'us',     minYield: 3.5,  maxPbr: 0, checkYahoo: true },
-  { code: 'SPYD', market: 'us',     minYield: 4.0,  maxPbr: 0, checkYahoo: true },
-  { code: 'ARCC', market: 'us',     minYield: 9.0,  maxPbr: 0, checkYahoo: true },
-  { code: 'QQQ',  market: 'us',     minYield: 0.5,  maxPbr: 0, checkYahoo: true },
-  // 日本株の例（証券コード）
-  // { code: '8058', market: 'japan', minYield: 3.75, maxPbr: 1.5, checkYahoo: true },
-  // { code: '9433', market: 'japan', minYield: 3.75, maxPbr: 1.5, checkYahoo: true },
+  // ===== 🇯🇵 日本株（NISA・配当無税） =====
+  // ── 総合商社（連続増配・高ROE） ──
+  { code: '8058', market: 'japan', minYield: 3.75, maxPbr: 1.5, checkYahoo: true },  // 三菱商事
+  { code: '8031', market: 'japan', minYield: 3.75, maxPbr: 1.5, checkYahoo: true },  // 三井物産
+  { code: '8053', market: 'japan', minYield: 3.75, maxPbr: 1.2, checkYahoo: true },  // 住友商事
+  { code: '8001', market: 'japan', minYield: 3.0,  maxPbr: 1.5, checkYahoo: true },  // 伊藤忠商事
+  // ── 通信（安定高配当） ──
+  { code: '9433', market: 'japan', minYield: 3.75, maxPbr: 2.0, checkYahoo: true },  // KDDI
+  { code: '9432', market: 'japan', minYield: 3.0,  maxPbr: 1.5, checkYahoo: true },  // NTT
+  { code: '9434', market: 'japan', minYield: 5.0,  maxPbr: 3.0, checkYahoo: true },  // ソフトバンク
+  // ── 銀行・金融（低PBRで高配当） ──
+  { code: '8316', market: 'japan', minYield: 3.75, maxPbr: 1.0, checkYahoo: true },  // 三井住友FG
+  { code: '8411', market: 'japan', minYield: 3.75, maxPbr: 0.8, checkYahoo: true },  // みずほFG
+  { code: '8306', market: 'japan', minYield: 3.0,  maxPbr: 1.0, checkYahoo: true },  // 三菱UFJ
+  // ── その他高配当 ──
+  { code: '2914', market: 'japan', minYield: 5.0,  maxPbr: 2.5, checkYahoo: true },  // 日本たばこ(JT)
+  { code: '1605', market: 'japan', minYield: 3.75, maxPbr: 1.2, checkYahoo: true },  // INPEX（資源）
+  { code: '9101', market: 'japan', minYield: 3.75, maxPbr: 1.0, checkYahoo: true },  // 日本郵船
+  { code: '9104', market: 'japan', minYield: 3.75, maxPbr: 1.0, checkYahoo: true },  // 商船三井
+  { code: '9107', market: 'japan', minYield: 3.75, maxPbr: 1.0, checkYahoo: true },  // 川崎汽船
+  { code: '8802', market: 'japan', minYield: 3.0,  maxPbr: 1.5, checkYahoo: true },  // 三菱地所
+  { code: '8015', market: 'japan', minYield: 3.75, maxPbr: 1.2, checkYahoo: true },  // 豊田通商
+  { code: '5020', market: 'japan', minYield: 3.75, maxPbr: 1.0, checkYahoo: true },  // ENEOS
+  // ===== 🇺🇸 米国高配当ETF =====
+  { code: 'VYM',  market: 'us',    minYield: 3.0,  maxPbr: 0,   checkYahoo: true },  // 米国高配当ETF
+  { code: 'HDV',  market: 'us',    minYield: 3.5,  maxPbr: 0,   checkYahoo: true },  // 米国高配当ETF
+  { code: 'SPYD', market: 'us',    minYield: 4.0,  maxPbr: 0,   checkYahoo: true },  // S&P500高配当ETF
+  { code: 'ARCC', market: 'us',    minYield: 9.0,  maxPbr: 0,   checkYahoo: true },  // BDC（月次配当）
 ];
 
 // 通知のクールダウン（同じ銘柄を連続通知しない）分
