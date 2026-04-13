@@ -1022,14 +1022,27 @@ async function fetchPrices() {
     const allCodes = [...new Set([...holdingCodes, ...watchCodes])];
     if (!allCodes.length) { state.fetchStatus = 'done'; updateFetchStatusUI(); return; }
 
-    const symbolsParam = allCodes.join(',');
-    const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}&lang=ja&region=JP`;
-    const res = await fetch(proxy(quoteUrl));
-    const json = await res.json();
-    const data = JSON.parse(json.contents);
-    const quotes = data?.quoteResponse?.result || [];
+    // v7は401エラーのためv8/chartで個別取得に切り替え
     const quoteMap = {};
-    quotes.forEach(q => { quoteMap[q.symbol] = q; });
+    for (const sym of allCodes) {
+      try {
+        const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
+        const res = await fetch(proxy(chartUrl), {signal: AbortSignal.timeout(8000)});
+        const json = await res.json();
+        const parsed = JSON.parse(json.contents);
+        const meta = parsed?.chart?.result?.[0]?.meta;
+        if (meta && meta.regularMarketPrice) {
+          quoteMap[sym] = {
+            symbol: sym,
+            regularMarketPrice: meta.regularMarketPrice,
+            trailingAnnualDividendRate: meta.trailingAnnualDividendRate || 0,
+            trailingAnnualDividendYield: meta.trailingAnnualDividendYield || 0,
+            priceToBook: null,
+            longName: meta.longName || meta.shortName || sym
+          };
+        }
+      } catch(e) { console.warn('v8 fetch error:', sym, e); }
+    }
 
     let updated = 0;
     state.stocks.forEach(s => {
