@@ -5,26 +5,47 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore: ['fx-rate.json', 'portfolio_export.json']
+    paths-ignore:
+      - 'fx-rate.json'
+      - 'portfolio_export.json'
 permissions:
   contents: write
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Fetch and save USD/JPY
-        run: |
-          RATE=""
-          for URL in "https://api.frankfurter.app/latest?from=USD&to=JPY" "https://open.er-api.com/v6/latest/USD" "https://api.exchangerate-api.com/v4/latest/USD"; do
-            R=$(curl -sf --max-time 10 "$URL" | python3 -c "import sys,json;d=json.load(sys.stdin);r=d.get('rates',{}).get('JPY');r and 100<float(str(r))<200 and print(r)" 2>/dev/null)
-            if [ -n "$R" ]; then RATE="$R"; break; fi
-          done
-          if [ -n "$RATE" ]; then
-            printf '{"usdJpy":%s,"updated":"%s"}\n' "$RATE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > fx-rate.json
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add fx-rate.json
-            git diff --staged --quiet || git commit -m "chore: update fx rate [skip ci]"
-            git push
-          fi
+      - name: Fetch USD/JPY and save
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const apis = [
+              'https://api.frankfurter.app/latest?from=USD&to=JPY',
+              'https://open.er-api.com/v6/latest/USD',
+              'https://api.exchangerate-api.com/v4/latest/USD'
+            ];
+            let rate = null;
+            for (const url of apis) {
+              try {
+                const res = await fetch(url);
+                const j = await res.json();
+                const v = j && j.rates && j.rates.JPY;
+                if (v && v > 100 && v < 200) { rate = v; break; }
+              } catch(e) { console.log(url, e.message); }
+            }
+            if (!rate) { core.setFailed('No rate found'); return; }
+            const content = JSON.stringify({usdJpy: rate, updated: new Date().toISOString()});
+            const encoded = Buffer.from(content).toString('base64');
+            let sha;
+            try {
+              const f = await github.rest.repos.getContent({owner:context.repo.owner,repo:context.repo.repo,path:'fx-rate.json'});
+              sha = f.data.sha;
+            } catch(e) {}
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'fx-rate.json',
+              message: 'chore: update fx rate [skip ci]',
+              content: encoded,
+              sha
+            });
+            console.log('fx-rate.json updated: ' + rate);
