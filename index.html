@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>é«éå½æ ªãã¼ããã©ãªãªç®¡ç</title>
+<title>高配当株ポートフォリオ管理</title>
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1a3a5c">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="é«éå½æ ª">
+<meta name="apple-mobile-web-app-title" content="高配当株">
 <link rel="apple-touch-icon" href="./icon.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -82,8 +82,8 @@ main{padding:20px;max-width:1400px;margin:0 auto}
 .table-toolbar select{border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;outline:none;background:#fff}
 table{width:100%;border-collapse:collapse}
 th{background:#f8fafc;font-size:11px;font-weight:600;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
-th.sort-asc::after{content:' â²'}
-th.sort-desc::after{content:' â¼'}
+th.sort-asc::after{content:' ▲'}
+th.sort-desc::after{content:' ▼'}
 th[data-sort]{cursor:pointer}
 th[data-sort]:hover{background:#eef2f7}
 td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
@@ -170,7 +170,7 @@ textarea{resize:vertical;min-height:60px}
 .guide-section h3{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .guide-section ul{list-style:none;display:flex;flex-direction:column;gap:6px}
 .guide-section li{display:flex;gap:8px;font-size:13px;line-height:1.6}
-.guide-section li::before{content:'â¢';color:var(--accent);font-weight:700;flex-shrink:0}
+.guide-section li::before{content:'•';color:var(--accent);font-weight:700;flex-shrink:0}
 .rule-card{border-left:3px solid var(--primary);padding:10px 14px;background:#f8fafc;border-radius:0 7px 7px 0;margin-bottom:8px}
 .rule-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
 .rule-card p{font-size:12px;color:var(--muted);line-height:1.6}
@@ -197,69 +197,48 @@ textarea{resize:vertical;min-height:60px}
 .pill.green{background:#e8f8f0;color:var(--success)}
 .pill.red{background:#fef0f0;color:var(--danger)}
 .info-row{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
-@media(max-width:768px){
-  header{height:auto;flex-wrap:wrap;padding:8px 12px;gap:6px}
-  header h1{font-size:15px}
-  .header-right{flex-wrap:wrap;gap:4px;width:100%}
-  .header-right button,.header-right label,.header-right a{padding:3px 8px;font-size:11px}
-  .header-right select{padding:3px 6px;font-size:11px}
-  #fx-rate-badge{font-size:11px;padding:2px 8px}
-  .badge-total{font-size:11px;padding:3px 8px}
-  #fetch-status{display:none}
-  nav{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .tabs{min-width:max-content}
-  .tab-btn{padding:8px 12px;font-size:12px}
-  main{padding:10px 8px}
-}
 @media(max-width:600px){
   .stat-grid{grid-template-columns:repeat(2,1fr)}
   .chart-grid{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
-  table{font-size:11px}
-  td,th{padding:6px 6px}
-  .section-header{flex-direction:column;align-items:flex-start;gap:8px}
-  .table-toolbar{flex-direction:column;gap:6px}
-  .table-toolbar input,.table-toolbar select{width:100%;box-sizing:border-box;font-size:13px}
-  .score-display{flex-direction:column;gap:8px}
-  .score-big{font-size:36px}
-  .link-grid{grid-template-columns:1fr}
-  .guide-section > div[style]{grid-template-columns:1fr!important}
+  table{font-size:12px}
+  td,th{padding:8px 8px}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div style="font-size:22px">ð</div>
-  <h1>é«éå½æ ªãã¼ããã©ãªãª</h1>
-  <span>ãªãå¤§æµ</span>
+  <div style="font-size:22px">📈</div>
+  <h1>高配当株ポートフォリオ</h1>
+  <span>リベ大流</span>
   <div class="header-right">
     <span id="fetch-status" style="font-size:11px;opacity:.7"></span>
-    <span id="fx-rate-badge" style="background:rgba(255,200,50,.25);border:1px solid rgba(255,200,50,.4);border-radius:14px;padding:3px 10px;font-size:12px;font-weight:600;color:#ffd966">ð± 1USD=Â¥150.0</span>
-    <button id="refresh-btn" onclick="fetchPrices()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">ð æ ªä¾¡æ´æ°</button>
+    <span id="fx-rate-badge" style="background:rgba(255,200,50,.25);border:1px solid rgba(255,200,50,.4);border-radius:14px;padding:3px 10px;font-size:12px;font-weight:600;color:#ffd966">💱 1USD=¥150.0</span>
+    <button id="refresh-btn" onclick="fetchPrices()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">🔄 株価更新</button>
     <select onchange="setAutoRefresh(+this.value)" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px;border-radius:6px;font-size:12px">
-      <option value="0">æåã®ã¿</option>
-      <option value="5">5åãã¨</option>
-      <option value="10">10åãã¨</option>
-      <option value="30">30åãã¨</option>
+      <option value="0">手動のみ</option>
+      <option value="5">5分ごと</option>
+      <option value="10">10分ごと</option>
+      <option value="30">30分ごと</option>
     </select>
-    <span id="auto-refresh-status" style="font-size:11px;opacity:.7;white-space:nowrap">èªåæ´æ°ãªã</span>
-    <div class="badge-total" id="header-summary">èª­ã¿è¾¼ã¿ä¸­...</div>
-    <button class="btn btn-outline btn-sm" onclick="exportData()" style="border-color:rgba(255,255,255,.4);color:#fff">ð¾ ã¨ã¯ã¹ãã¼ã</button>
+    <span id="auto-refresh-status" style="font-size:11px;opacity:.7;white-space:nowrap">自動更新オフ</span>
+    <div class="badge-total" id="header-summary">読み込み中...</div>
+    <button class="btn btn-outline btn-sm" onclick="exportData()" style="border-color:rgba(255,255,255,.4);color:#fff">💾 エクスポート</button>
     <label class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,.4);color:#fff;cursor:pointer">
-      ð ã¤ã³ãã¼ã<input type="file" accept=".json" style="display:none" onchange="importData(this)">
+      📂 インポート<input type="file" accept=".json" style="display:none" onchange="importData(this)">
     </label>
-    <a href="./github_setup_guide.html" target="_blank" class="btn btn-outline btn-sm" style="border-color:rgba(255,200,60,.6);color:#f0c040;white-space:nowrap">ð± ã¹ããè¨­å®</a>
+    <a href="./github_setup_guide.html" target="_blank" class="btn btn-outline btn-sm" style="border-color:rgba(255,200,60,.6);color:#f0c040;white-space:nowrap">📱 スマホ設定</a>
   </div>
 </header>
 
 <nav>
   <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('dashboard',this)">ð ããã·ã¥ãã¼ã</button>
-    <button class="tab-btn" onclick="showTab('portfolio',this)">ð ä¿æéæ</button>
-    <button class="tab-btn" onclick="showTab('screening',this)">ð éæã¹ã¯ãªã¼ãã³ã°</button>
-    <button class="tab-btn" onclick="showTab('guide',this)">ð æè³ã¬ã¤ã</button>
-    <button class="tab-btn" onclick="showTab('watchlist',this)">ð éç¥ã»ã¦ã©ãã</button>
+    <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 ダッシュボード</button>
+    <button class="tab-btn" onclick="showTab('portfolio',this)">📋 保有銘柄</button>
+    <button class="tab-btn" onclick="showTab('screening',this)">🔍 銘柄スクリーニング</button>
+    <button class="tab-btn" onclick="showTab('guide',this)">📚 投資ガイド</button>
+    <button class="tab-btn" onclick="showTab('watchlist',this)">🔔 通知・ウォッチ</button>
   </div>
 </nav>
 
@@ -269,20 +248,20 @@ textarea{resize:vertical;min-height:60px}
 <div id="tab-dashboard" class="tab-content active">
   <div class="stat-grid" id="stat-grid"></div>
   <div class="alert-panel">
-    <h3>â ï¸ ã¢ã©ã¼ãã»ãã§ãã¯</h3>
+    <h3>⚠️ アラート・チェック</h3>
     <div id="alerts-list"></div>
   </div>
   <div class="chart-grid">
     <div class="chart-card">
-      <h3>ã»ã¯ã¿ã¼éå</h3>
+      <h3>セクター配分</h3>
       <canvas id="chart-sector"></canvas>
     </div>
     <div class="chart-card">
-      <h3>ãã£ãã§ã³ã·ã vs æ¯æ°ææ</h3>
+      <h3>ディフェンシブ vs 景気敏感</h3>
       <canvas id="chart-type"></canvas>
     </div>
     <div class="chart-card">
-      <h3>éå½éããã10éæ</h3>
+      <h3>配当金トップ10銘柄</h3>
       <canvas id="chart-top-div"></canvas>
     </div>
   </div>
@@ -291,53 +270,53 @@ textarea{resize:vertical;min-height:60px}
 <!-- PORTFOLIO -->
 <div id="tab-portfolio" class="tab-content">
   <div class="section-header">
-    <h2>ä¿æéæä¸è¦§</h2>
-    <button class="btn btn-primary" onclick="openAddModal()">ï¼ éæè¿½å </button>
+    <h2>保有銘柄一覧</h2>
+    <button class="btn btn-primary" onclick="openAddModal()">＋ 銘柄追加</button>
   </div>
   <div class="table-wrap">
     <div class="table-toolbar">
-      <input type="text" id="search-input" placeholder="ð éæåã»ã³ã¼ãã§æ¤ç´¢" oninput="renderPortfolio()">
+      <input type="text" id="search-input" placeholder="🔍 銘柄名・コードで検索" oninput="renderPortfolio()">
       <select id="filter-sector" onchange="renderPortfolio()">
-        <option value="">ãã¹ã¦ã®ã»ã¯ã¿ã¼</option>
+        <option value="">すべてのセクター</option>
       </select>
       <select id="filter-type" onchange="renderPortfolio()">
-        <option value="">ç¨®å¥ãã¹ã¦</option>
-        <option value="defensive">ãã£ãã§ã³ã·ã</option>
-        <option value="cyclical">æ¯æ°ææ</option>
-        <option value="other">ãã®ä»</option>
+        <option value="">種別すべて</option>
+        <option value="defensive">ディフェンシブ</option>
+        <option value="cyclical">景気敏感</option>
+        <option value="other">その他</option>
       </select>
       <select id="filter-market" onchange="renderPortfolio()">
-        <option value="">å¸å ´ãã¹ã¦</option>
-        <option value="japan">æ¥æ¬æ ª</option>
-        <option value="us">ç±³å½æ ª</option>
+        <option value="">市場すべて</option>
+        <option value="japan">日本株</option>
+        <option value="us">米国株</option>
       </select>
     </div>
     <div style="overflow-x:auto">
       <table>
         <thead>
           <tr>
-            <th>ã³ã¼ã</th>
-            <th>éæå</th>
-            <th>å¸å ´</th>
-            <th>ã»ã¯ã¿ã¼</th>
-            <th>ç¨®å¥</th>
-            <th data-sort="shares" onclick="sortTable(this)">æ ªæ°</th>
-            <th data-sort="purchasePrice" onclick="sortTable(this)">è³¼å¥åä¾¡</th>
-            <th data-sort="currentPrice" onclick="sortTable(this)">ç¾å¨å¤</th>
-            <th data-sort="pl" onclick="sortTable(this)">å«ã¿æç</th>
-            <th data-sort="yield" onclick="sortTable(this)">å©åã</th>
-            <th data-sort="annualDiv" onclick="sortTable(this)">å¹´ééå½</th>
-            <th data-sort="score" onclick="sortTable(this)">ã¹ã³ã¢</th>
-            <th>ãã³ãã³</th>
-            <th>æä½</th>
+            <th>コード</th>
+            <th>銘柄名</th>
+            <th>市場</th>
+            <th>セクター</th>
+            <th>種別</th>
+            <th data-sort="shares" onclick="sortTable(this)">株数</th>
+            <th data-sort="purchasePrice" onclick="sortTable(this)">購入単価</th>
+            <th data-sort="currentPrice" onclick="sortTable(this)">現在値</th>
+            <th data-sort="pl" onclick="sortTable(this)">含み損益</th>
+            <th data-sort="yield" onclick="sortTable(this)">利回り</th>
+            <th data-sort="annualDiv" onclick="sortTable(this)">年間配当</th>
+            <th data-sort="score" onclick="sortTable(this)">スコア</th>
+            <th>ナンピン</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody id="portfolio-tbody"></tbody>
       </table>
     </div>
     <div id="portfolio-empty" class="empty-state" style="display:none">
-      <p>ä¿æéæãããã¾ãã</p>
-      <small>ãéæè¿½å ããã¿ã³ããæåã®éæãç»é²ãã¦ãã ãã</small>
+      <p>保有銘柄がありません</p>
+      <small>「銘柄追加」ボタンから最初の銘柄を登録してください</small>
     </div>
   </div>
 </div>
@@ -345,28 +324,28 @@ textarea{resize:vertical;min-height:60px}
 <!-- SCREENING -->
 <div id="tab-screening" class="tab-content">
   <div class="section-header">
-    <h2>éæã¹ã¯ãªã¼ãã³ã°ï¼IRãã³ã¯æ´»ç¨ï¼</h2>
+    <h2>銘柄スクリーニング（IRバンク活用）</h2>
   </div>
   <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
-    <a href="https://irbank.net" target="_blank">IR Bank</a> ã
-    <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ãã¡ã¤ãã³ã¹</a>
-    ã§èª¿ã¹ãææ¨ãå¥åãã¦ãéæã®ã¹ã³ã¢ãè©ä¾¡ãã¾ãã
+    <a href="https://irbank.net" target="_blank">IR Bank</a> や
+    <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ファイナンス</a>
+    で調べた指標を入力して、銘柄のスコアを評価します。
   </p>
   <div class="screen-form">
     <div class="form-grid" style="margin-bottom:16px">
       <div class="form-group">
-        <label>è¨¼å¸ã³ã¼ã</label>
-        <input type="text" id="sc-code" placeholder="ä¾ï¼8058">
+        <label>証券コード</label>
+        <input type="text" id="sc-code" placeholder="例：8058">
       </div>
       <div class="form-group">
-        <label>éæå</label>
-        <input type="text" id="sc-name" placeholder="ä¾ï¼ä¸è±åäº">
+        <label>銘柄名</label>
+        <input type="text" id="sc-name" placeholder="例：三菱商事">
       </div>
     </div>
     <div id="screening-form-content"></div>
     <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="calcScreening()">ð ã¹ã³ã¢ãè¨ç®ãã</button>
-      <button class="btn btn-outline" onclick="addFromScreening()">ï¼ ãã¼ããã©ãªãªã«è¿½å </button>
+      <button class="btn btn-primary" onclick="calcScreening()">📊 スコアを計算する</button>
+      <button class="btn btn-outline" onclick="addFromScreening()">＋ ポートフォリオに追加</button>
     </div>
   </div>
   <div id="screening-result" style="display:none"></div>
@@ -375,115 +354,115 @@ textarea{resize:vertical;min-height:60px}
 <!-- GUIDE -->
 <div id="tab-guide" class="tab-content">
   <div class="guide-section">
-    <h3>ð¯ ãªãå¤§æµ é«éå½æ ªæè³ã®5åå</h3>
+    <h3>🎯 リベ大流 高配当株投資の5原則</h3>
     <div class="rule-card">
-      <h4>â  æè³åã¯ãç±³å½æ ªãã¨ãæ¥æ¬æ ªãã®2æ¬æ±</h4>
-      <p>æ¯çã¯æ¥æ¬æ ª50%ï¼ç±³å½æ ª50%ãç®å®ãæ¥æ¬å¨ä½èã¯åã§ã®ã­ã£ãã·ã¥ãã­ã¼ãéè¦ãªãããæ¥æ¬æ ªãå¿é ã</p>
+      <h4>① 投資先は「米国株」と「日本株」の2本柱</h4>
+      <p>比率は日本株50%：米国株50%が目安。日本在住者は円でのキャッシュフローが重要なため、日本株も必須。</p>
     </div>
     <div class="rule-card">
-      <h4>â¡ éä¸­æè³ç¦æ­¢ã»50éæä»¥ä¸ã«åæ£</h4>
-      <p>1éæã¸ã®ä¾å­ã§æ¸éãªã¹ã¯ãæ¥å¢ã1ç¤¾ãããã®éå½éãå¨ä½ã®3%ä»¥åã«æããã</p>
+      <h4>② 集中投資禁止・50銘柄以上に分散</h4>
+      <p>1銘柄への依存で減配リスクが急増。1社あたりの配当金を全体の3%以内に抑える。</p>
     </div>
     <div class="rule-card">
-      <h4>â¢ ç±³å½æ ªã¯é«éå½ETFã§å¯¾å¿ï¼VYMã»HDVãªã©ï¼</h4>
-      <p>ä½ã³ã¹ãã»å¢éãã¬ã³ãã»å¤åãã®å®å®æ§ãç±³å½ã¯åå¥ããåªããETFãå¤ãã</p>
+      <h4>③ 米国株は高配当ETFで対応（VYM・HDVなど）</h4>
+      <p>低コスト・増配トレンド・値動きの安定性。米国は個別より優れたETFが多い。</p>
     </div>
     <div class="rule-card">
-      <h4>â£ æ¥æ¬æ ªã¯åå¥éæã§ãèªä½ãã¡ã³ãããæ§ç¯</h4>
-      <p>æ¥æ¬æ ªETFã¯åééãä¸å®å®ã»ææ°æé«ããèªåã§éæãé¸ã¶ãã¨ã§ãã£ãã§ã³ã·ãéæãéè¦ã§ããã</p>
+      <h4>④ 日本株は個別銘柄で「自作ファンド」を構築</h4>
+      <p>日本株ETFは分配金が不安定・手数料高め。自分で銘柄を選ぶことでディフェンシブ銘柄を重視できる。</p>
     </div>
     <div class="rule-card">
-      <h4>â¤ ãã¼ããã©ãªãªã®å®ååã«ã¼ã«</h4>
+      <h4>⑤ ポートフォリオの守備力ルール</h4>
       <ul style="list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:4px">
-        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">â¢</span>1ã»ã¯ã¿ã¼ã®æ¯ç â 20%ä»¥ä¸</li>
-        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">â¢</span>1éæããã®éå½é â å¨ä½ã®3%ä»¥å</li>
-        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">â¢</span>ãã£ãã§ã³ã·ãéææ¯ç â 50%ä»¥ä¸</li>
-        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">â¢</span>ãã³ãã³ã¯è²·å¤ãã20%ä¸è½ã§1åç®ã40%ä¸è½ã§2åç®ï¼è¨2åã¾ã§ï¼</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>1セクターの比率 → 20%以下</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>1銘柄からの配当金 → 全体の3%以内</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>ディフェンシブ銘柄比率 → 50%以上</li>
+        <li style="display:flex;gap:8px;font-size:12px"><span style="color:var(--accent);font-weight:700">•</span>ナンピンは買値から20%下落で1回目、40%下落で2回目（計2回まで）</li>
       </ul>
     </div>
   </div>
 
   <div class="guide-section">
-    <h3>ð IRãã³ã¯ã§ç¢ºèªãã¹ã8é ç®</h3>
+    <h3>🔍 IRバンクで確認すべき8項目</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">
       <div class="rule-card">
-        <h4>â  å£²ä¸é«ãã¬ã³ã</h4>
-        <p>å³è©ä¸ãã or æ¿ããããªãå¢æ¸ãå®å®ãåºæ¬ã</p>
+        <h4>① 売上高トレンド</h4>
+        <p>右肩上がり or 激しすぎない増減。安定が基本。</p>
       </div>
       <div class="rule-card">
-        <h4>â¡ EPSï¼1æ ªå©çï¼âæéè¦</h4>
-        <p>é·æçã«å³è©ä¸ãããå¿é ãä¸éãã¬ã³ãã¯æè³ä¸é©ã</p>
+        <h4>② EPS（1株利益）★最重要</h4>
+        <p>長期的に右肩上がりが必須。下降トレンドは投資不適。</p>
       </div>
       <div class="rule-card">
-        <h4>â¢ å¶æ¥­å©çç</h4>
-        <p>10%ä»¥ä¸ã§åªç§ã5%ä»¥ä¸ã¯è¦æ³¨æããã¬ã³ããç¢ºèªã</p>
+        <h4>③ 営業利益率</h4>
+        <p>10%以上で優秀。5%以下は要注意。トレンドも確認。</p>
       </div>
       <div class="rule-card">
-        <h4>â£ èªå·±è³æ¬æ¯ç</h4>
-        <p>40%ä»¥ä¸æ¨å¥¨ã60%ä»¥ä¸ã§å®å¿ã80%ä»¥ä¸ãªãç¤ç³ã</p>
+        <h4>④ 自己資本比率</h4>
+        <p>40%以上推奨。60%以上で安心。80%以上なら盤石。</p>
       </div>
       <div class="rule-card">
-        <h4>â¤ å¶æ¥­ã­ã£ãã·ã¥ãã­ã¼</h4>
-        <p>æ¯å¹´é»å­ãã¤å¢å å¾åãçæ³ã10å¹´åã«ä¸åº¦ã§ãèµ¤å­ã¯æ³¨æã</p>
+        <h4>⑤ 営業キャッシュフロー</h4>
+        <p>毎年黒字かつ増加傾向が理想。10年内に一度でも赤字は注意。</p>
       </div>
       <div class="rule-card">
-        <h4>â¥ ç¾éç­ã®æ¨ç§»</h4>
-        <p>æåç¾éãå¢å ãã¬ã³ãã«ãããã¨ãã­ã£ãã·ã¥ãªãããä¸æ³ã«å¼·ãã</p>
+        <h4>⑥ 現金等の推移</h4>
+        <p>手元現金が増加トレンドにあること。キャッシュリッチが不況に強い。</p>
       </div>
       <div class="rule-card">
-        <h4>â¦ 1æ ªå½ããéå½é âéè¦</h4>
-        <p>æ¸éã»ç¡éãªããé·æå¢éãã¬ã³ããçæ³ãä¸æ³æãç¶­æã§ãããç¢ºèªã</p>
+        <h4>⑦ 1株当たり配当金 ★重要</h4>
+        <p>減配・無配なし。長期増配トレンドが理想。不況時も維持できるか確認。</p>
       </div>
       <div class="rule-card">
-        <h4>â§ éå½æ§å</h4>
-        <p>30ã50%ãå¥å¨ã70ã80%è¶ã¯æ¸éãªã¹ã¯å¤§ãä½ãããå ´åãéåå§¿å¢ãç¢ºèªã</p>
+        <h4>⑧ 配当性向</h4>
+        <p>30〜50%が健全。70〜80%超は減配リスク大。低すぎる場合も還元姿勢を確認。</p>
       </div>
     </div>
   </div>
 
   <div class="guide-section">
-    <h3>ð£ ãã³ã¨æ ªã®10æ¡ä»¶ï¼ã¹ã¯ãªã¼ãã³ã°è¿½å åºæºï¼</h3>
+    <h3>🐣 こびと株の10条件（スクリーニング追加基準）</h3>
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
-      ä¸¡å­¦é·ï¼ãªãå¤§ï¼ã¨ååãããã³ã¨æ ªæ°ã®å³é¸åºæºãä¸è¨8é ç®ã«å ãã¦ãã®æ¡ä»¶ã§äºéãã§ãã¯ã
+      両学長（リベ大）と協働するこびと株氏の厳選基準。上記8項目に加えてこの条件で二重チェック。
     </p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-      <div class="rule-card"><h4>â  éå½å©åã 3.75%ä»¥ä¸</h4><p>ç¨å¼å¾3%ç¸å½ã33å¹´ã§åæ¬ååã§ããæ°´æºã</p></div>
-      <div class="rule-card"><h4>â¡ PBR 0.5ã1.5å</h4><p>ç´è³ç£ã®0.5ã1.5åã§è²·ããæ°´æºãéåº¦ãªæé·æå¾ãªãã</p></div>
-      <div class="rule-card"><h4>â¢ éå½æ¿ç­ãæç¢º</h4><p>IRè³æã«éå½æ¹éãææåãããéå»ã®å®ç¸¾ã¨çç¾ããªãã</p></div>
-      <div class="rule-card"><h4>â£ éå½ç¶ç¶åãé«ã</h4><p>å©çå°ä½éã»ãããã­ã£ãã·ã¥ã§ä½å¹´éå½ãåºãããã</p></div>
-      <div class="rule-card"><h4>â¤â¥â¦ å£²ä¸ã»EPSã»BPSä¸æ</h4><p>é·æçã«å£²ä¸ã»1æ ªå©çã»1æ ªç´è³ç£ãå³è©ä¸ããã</p></div>
-      <div class="rule-card"><h4>â§ èªå·±è³æ¬æ¯ç 50%ä»¥ä¸</h4><p>ãã³ã¨æ ªåºæºã¯50%ä»¥ä¸ï¼ãªãå¤§40%ããå³æ ¼ï¼ã</p></div>
-      <div class="rule-card"><h4>â¨ æµåæ¯ç 200%ä»¥ä¸</h4><p>ç­æåµåã®2åã®æµåè³ç£ãæ¯æãä½åã®è¨¼æã</p></div>
-      <div class="rule-card"><h4>â© ç¾éæ¯çãé«ãä¸æä¸­</h4><p>æåç¾éã®å¢å å¾åãä¸æ³ã§ãéå½ãå®ããä½åã</p></div>
+      <div class="rule-card"><h4>① 配当利回り 3.75%以上</h4><p>税引後3%相当。33年で元本回収できる水準。</p></div>
+      <div class="rule-card"><h4>② PBR 0.5〜1.5倍</h4><p>純資産の0.5〜1.5倍で買える水準。過度な成長期待なし。</p></div>
+      <div class="rule-card"><h4>③ 配当政策が明確</h4><p>IR資料に配当方針が明文化され、過去の実績と矛盾しない。</p></div>
+      <div class="rule-card"><h4>④ 配当継続力が高い</h4><p>利益剰余金・ネットキャッシュで何年配当を出せるか。</p></div>
+      <div class="rule-card"><h4>⑤⑥⑦ 売上・EPS・BPS上昇</h4><p>長期的に売上・1株利益・1株純資産が右肩上がり。</p></div>
+      <div class="rule-card"><h4>⑧ 自己資本比率 50%以上</h4><p>こびと株基準は50%以上（リベ大40%より厳格）。</p></div>
+      <div class="rule-card"><h4>⑨ 流動比率 200%以上</h4><p>短期債務の2倍の流動資産。支払い余力の証明。</p></div>
+      <div class="rule-card"><h4>⑩ 現金比率が高く上昇中</h4><p>手元現金の増加傾向。不況でも配当を守れる体力。</p></div>
     </div>
   </div>
 
   <div class="guide-section">
-    <h3>ð ä¾¿å©ãªãªã³ã¯é</h3>
+    <h3>🔗 便利なリンク集</h3>
     <div class="link-grid">
       <a href="https://irbank.net" target="_blank" class="link-card">
-        <div class="link-icon">ð</div>
-        <div class="link-text"><strong>IR Bank</strong><span>è²¡åãã¼ã¿ã»éå½å±¥æ­´ã®åæ</span></div>
+        <div class="link-icon">📊</div>
+        <div class="link-text"><strong>IR Bank</strong><span>財務データ・配当履歴の分析</span></div>
       </a>
       <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank" class="link-card">
-        <div class="link-icon">ð¦</div>
-        <div class="link-text"><strong>Yahoo!ãã¡ã¤ãã³ã¹</strong><span>é«éå½å©åãã©ã³ã­ã³ã°</span></div>
+        <div class="link-icon">🏦</div>
+        <div class="link-text"><strong>Yahoo!ファイナンス</strong><span>高配当利回りランキング</span></div>
       </a>
       <a href="https://www.sbisec.co.jp" target="_blank" class="link-card">
-        <div class="link-icon">ð¹</div>
-        <div class="link-text"><strong>SBIè¨¼å¸</strong><span>1æ ªåä½ã§å°é¡æè³å¯è½</span></div>
+        <div class="link-icon">💹</div>
+        <div class="link-text"><strong>SBI証券</strong><span>1株単位で少額投資可能</span></div>
       </a>
       <a href="https://kabutan.jp" target="_blank" class="link-card">
-        <div class="link-icon">ð</div>
-        <div class="link-text"><strong>æ ªæ¢ï¼ãã¶ããï¼</strong><span>æ¥­ç¸¾ã»éå½æå ±ã®ç¢ºèª</span></div>
+        <div class="link-icon">📉</div>
+        <div class="link-text"><strong>株探（かぶ瑟ん）</strong><span>業績・配当情報の確認</span></div>
       </a>
       <a href="https://minkabu.jp" target="_blank" class="link-card">
-        <div class="link-icon">ð</div>
-        <div class="link-text"><strong>ã¿ããã¶</strong><span>éæã¹ã¯ãªã¼ãã³ã°</span></div>
+        <div class="link-icon">🔎</div>
+        <div class="link-text"><strong>みんかぶ</strong><span>銘柄スクリーニング</span></div>
       </a>
       <a href="https://seekingalpha.com" target="_blank" class="link-card">
-        <div class="link-icon">ð</div>
-        <div class="link-text"><strong>Seeking Alpha</strong><span>ç±³å½æ ªã®éå½åæ</span></div>
+        <div class="link-icon">🌐</div>
+        <div class="link-text"><strong>Seeking Alpha</strong><span>米国株の配当分析</span></div>
       </a>
     </div>
   </div>
@@ -494,49 +473,49 @@ textarea{resize:vertical;min-height:60px}
 <!-- WATCHLIST TAB -->
 <div class="tab-content" id="tab-watchlist">
   <div class="section-header">
-    <h2>ð ãªã¢ã«ã¿ã¤ã éç¥ã»ã¦ã©ãããªã¹ã</h2>
+    <h2>🔔 リアルタイム通知・ウォッチリスト</h2>
   </div>
 
   <div class="chart-card" style="margin-bottom:16px">
-    <h3>ð ãã©ã¦ã¶éç¥è¨­å®</h3>
+    <h3>🛎 ブラウザ通知設定</h3>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
-      <button onclick="requestNotificationPermission()" style="background:var(--primary);color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:13px">éç¥ãè¨±å¯ãã</button>
-      <span id="notif-status" style="font-size:13px;color:var(--muted)">ã¹ãã¼ã¿ã¹ç¢ºèªä¸­...</span>
-      <span style="font-size:12px;color:var(--muted)">â» ãã©ã¦ã¶ãéãã¦ããéã®ã¿éç¥ããã¾ã</span>
+      <button onclick="requestNotificationPermission()" style="background:var(--primary);color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:13px">通知を許可する</button>
+      <span id="notif-status" style="font-size:13px;color:var(--muted)">ステータス確認中...</span>
+      <span style="font-size:12px;color:var(--muted)">※ ブラウザを開いている間はみ通知されます</span>
     </div>
     <p style="font-size:12px;color:var(--muted);margin-top:8px">
-      ã¦ã©ããéæãè¨­å®ãããç®æ¨éå½å©åããããç®æ¨PBRãã«éããã¨ãã¹ã¯ãããéç¥ãå±ãã¾ããæ ªä¾¡æ´æ°ãã¿ã³ã¾ãã¯èªåæ´æ°ãæå¹ã«ãã¦ãã ããã
+      ウォッチ銘柄が設定した「目標配当利回り」や「目標PBR」に達するとデスクトップ通知が届きます。株価更新ボタンまたは自動更新を有効にしてください。
     </p>
   </div>
 
   <div class="chart-card" style="margin-bottom:16px">
-    <h3>â ç£è¦éæãè¿½å ï¼ãã³ã¨æ ª10æ¡ä»¶ã§ã¢ã©ã¼ãï¼</h3>
+    <h3>➕ 監視銘柄を追加（こびと株10条件でアラート）</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px">
       <div class="form-group" style="margin:0">
-        <label>è¨¼å¸ã³ã¼ã</label>
-        <input type="text" id="w-code" placeholder="ä¾ï¼8058 / VYM" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+        <label>証券コード</label>
+        <input type="text" id="w-code" placeholder="例：8058 / VYM" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
       </div>
       <div class="form-group" style="margin:0">
-        <label>éæåï¼çç¥å¯ï¼</label>
-        <input type="text" id="w-name" placeholder="èªååå¾ããã¾ã" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+        <label>銘柄名（省略可）</label>
+        <input type="text" id="w-name" placeholder="自動取得されます" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
       </div>
       <div class="form-group" style="margin:0">
-        <label>å¸å ´</label>
+        <label>市場</label>
         <select id="w-market" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 8px;font-size:13px;background:#fff">
-          <option value="japan">æ¥æ¬æ ª</option>
-          <option value="us">ç±³å½æ ª</option>
+          <option value="japan">日本株</option>
+          <option value="us">米国株</option>
         </select>
       </div>
       <div class="form-group" style="margin:0">
-        <label>ç®æ¨å©åãï¼% ä»¥ä¸ã§éç¥ï¼</label>
-        <input type="number" id="w-yield" placeholder="ä¾ï¼3.75" step="0.1" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+        <label>目標利回り（% 以上で通知）</label>
+        <input type="number" id="w-yield" placeholder="例：3.75" step="0.1" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
       </div>
       <div class="form-group" style="margin:0">
-        <label>ç®æ¨PBRï¼ä»¥ä¸ã§éç¥ï¼</label>
-        <input type="number" id="w-pbr" placeholder="ä¾ï¼1.5" step="0.01" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
+        <label>目標PBR（以下で通知）</label>
+        <input type="number" id="w-pbr" placeholder="例：1.5" step="0.01" min="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px">
       </div>
       <div class="form-group" style="margin:0;display:flex;align-items:flex-end">
-        <button onclick="addWatchItem()" style="width:100%;background:var(--success);color:#fff;border:none;padding:8px;border-radius:7px;cursor:pointer;font-size:13px">è¿½å ãã</button>
+        <button onclick="addWatchItem()" style="width:100%;background:var(--success);color:#fff;border:none;padding:8px;border-radius:7px;cursor:pointer;font-size:13px">追加する</button>
       </div>
     </div>
   </div>
@@ -545,62 +524,61 @@ textarea{resize:vertical;min-height:60px}
     <table>
       <thead>
         <tr>
-          <th>ã³ã¼ã</th><th>éæå</th><th>å¸å ´</th><th>ç¾å¨æ ªä¾¡ï¼åï¼</th>
-          <th>éå½å©åã</th><th>PBR</th><th>ç®æ¨å©åã</th><th>ç®æ¨PBR</th>
-          <th>ã¹ãã¼ã¿ã¹</th><th>æä½</th>
+          <th>コード</th><th>銘柄名</th><th>市場</th><th>現在株価（円）</th>
+          <th>配当利回り</th><th>PBR</th><th>目標利回り</th><th>目標PBR</th>
+          <th>ステータス</th><th>操作</th>
         </tr>
       </thead>
       <tbody id="watchlist-tbody">
-        <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ã¦ã©ããéæãããã¾ãããä¸ã®ãã©ã¼ã ããè¿½å ãã¦ãã ããã</td></tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ウォッチ銘柄がありません。上のフォームから追加してください。</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="guide-section" style="margin-top:20px">
-    <h3>ð ãã³ã¨æ ª10æ¡ä»¶ãã§ãã¯ã®æé </h3>
+    <h3>📋 こびと株10条件チェックの手順</h3>
     <ol style="font-size:13px;line-height:2;padding-left:20px;color:var(--text)">
-      <li>Yahoo!ãã¡ã¤ãã³ã¹ã®é«éå½ã©ã³ã­ã³ã°ã§åè£ãæ¢ã â <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ãã¡ã¤ãã³ã¹ éå½å©åãã©ã³ã­ã³ã°</a></li>
-      <li>IRBankã§éå»10å¹´ã®æ¥­ç¸¾ãç¢ºèª â <a href="https://irbank.net" target="_blank">IRBank</a></li>
-      <li>éå½å©åã3.75%ä»¥ä¸ã»PBR0.5ã1.5åã»èªå·±è³æ¬æ¯ç50%ä»¥ä¸ã»æµåæ¯ç200%ä»¥ä¸ ããã§ãã¯</li>
-      <li>ä¸ã®ãã©ã¼ã ã«éæãç»é²ãã¦ãç®æ¨å©åãï¼3.75ããç®æ¨PBRï¼1.5ããè¨­å®</li>
-      <li>ãð æ ªä¾¡æ´æ°ãã§èªåãã§ãã¯ â æ¡ä»¶ãæºããã¨éç¥ãå±ã</li>
+      <li>Yahoo!ファイナンスの高配当ランキングで候補を探す → <a href="https://finance.yahoo.co.jp/stocks/ranking/dividendYield" target="_blank">Yahoo!ファイナンス 配当利回りランキング</a></li>
+      <li>IRBankで過去10年の業績を確認 → <a href="https://irbank.net" target="_blank">IRBank</a></li>
+      <li>配当利回り3.75%以上・PBR0.5〜1.5倍・自己資本比率50%以上・流動比率200%以上 をチェック</li>
+      <li>上のフォームに銘柄を登録して「目標利回り：3.75」「目標PBR：1.5」を設定</li>
+      <li>「🔄 株価更新」で自動チェック → 条件を満たすと通知が届く</li>
     </ol>
   </div>
 
-  <!-- GASé£æºã¨ã¯ã¹ãã¼ã -->
+  <!-- GAS連携エクスポート -->
   <div class="chart-card" style="margin-top:16px;border-left:4px solid var(--accent)">
-    <h3>ð² Androidã¹ããã«ãªã¢ã«ã¿ã¤ã éç¥ï¼Google Apps Scripté£æºï¼</h3>
-    <p style="font-size:12px;color:var(--muted);margin:8px 0 14px">PCãéãã¦ãã¦ããGoogleã®ã¯ã©ã¦ãã24æéèªåç£è¦ãã¦ã¹ããã«éç¥ãã¾ãã</p>
+    <h3>📲 Androidスマホにリアルタイム通知（Google Apps Script連携）</h3>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 14px">PCが閉じていても、Googleのクラウドが24時間自動監視してスマホに通知します。</p>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px">
       <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
-        <div style="font-weight:700;margin-bottom:4px">âï¸ Google Apps Script</div>
-        <div style="color:var(--muted)">Googleãµã¼ãã¼ã§10åãã¨ã«èªåå®è¡ï¼å®å¨ç¡æï¼</div>
+        <div style="font-weight:700;margin-bottom:4px">☁️ Google Apps Script</div>
+        <div style="color:var(--muted)">Googleサーバーで10分ごとに自動実行（完全無料）</div>
       </div>
       <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
-        <div style="font-weight:700;margin-bottom:4px">ð¤ Telegram Bot</div>
-        <div style="color:var(--muted)">ã·ã°ãã«çºçæã«å³åº§ã«ã¹ããã¸ããã·ã¥éç¥</div>
+        <div style="font-weight:700;margin-bottom:4px">🤖 Telegram Bot</div>
+        <div style="color:var(--muted)">シグナル発生時に即座にスマホへプッシュ通知</div>
       </div>
       <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px">
-        <div style="font-weight:700;margin-bottom:4px">ð èªåãã§ãã¯é ç®</div>
-        <div style="color:var(--muted)">éå½å©åãã»PBRã»USD/JPYæç®ã»æ¯æ9æãµããªã¼</div>
+        <div style="font-weight:700;margin-bottom:4px">📊 自動チェック項目</div>
+        <div style="color:var(--muted)">配当利回り・PBR・USD/JPY換算・毎朝9時サマリー</div>
       </div>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button onclick="exportGasWatchlist()" style="background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600">
-        ð¥ ã¦ã©ãããªã¹ããGASç¨ã«ã¨ã¯ã¹ãã¼ã
+        📥 ウォッチリストをGAS用にエクスポート
       </button>
       <a href="notification-bot/setup_guide.html" target="_blank" style="background:var(--accent);color:#fff;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none">
-        ð ã»ããã¢ããã¬ã¤ããéã
+        📖 セットアップガイドを開く
       </a>
-      <span style="font-size:12px;color:var(--muted)">â» GASã®Config.gsã«è²¼ãä»ãã¦ä½¿ç¨ãã¾ã</span>
+      <span style="font-size:12px;color:var(--muted)">※ GASのConfig.gs9�資料に右資料を内て��Zけて使用します</span>
     </div>
 
     <div id="gas-export-area" style="display:none;margin-top:14px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">ä»¥ä¸ãã³ãã¼ãã¦ GAS ã® Config.gs åã® <code>getDefaultWatchlist()</code> ã® return éåã¨ç½®ãæãã¦ãã ããï¼</div>
-      <textarea id="gas-export-text" readonly style="width:100%;height:180px;font-family:monospace;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:10px;background:#1e2a3a;color:#a8d8a8;resize:vertical"></textarea>
-      <button onclick="copyGasExport()" style="margin-top:8px;background:var(--success);color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px">ð ã¯ãªãããã¼ãã«ã³ãã¼</button>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">以下をコピーして GAS の Config.gs 内の <code>getDefaultWatchlist()</code> の return 配列と置き換えてください：</div>
+      <textarea id="gas-export-text" readonly style="width:100%;height:180px;font-family:monospace;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:10px;background:#1e2a3a;color:#a8d8a8;resize:ve     <button onclick="copyGasExport()" style="margin-top:8px;background:var(--success);color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px">📋 クリップボードにコピー</button>
     </div>
   </div>
 </div>
@@ -609,189 +587,189 @@ textarea{resize:vertical;min-height:60px}
 <div class="modal-overlay" id="stock-modal">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-title">éæãè¿½å </h2>
-      <button class="modal-close" onclick="closeModal()">â</button>
+      <h2 id="modal-title">銘柄を追加</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <form id="stock-form" onsubmit="return false">
         <input type="hidden" id="f-id">
         <div class="form-section">
-          <div class="form-section-title">ð åºæ¬æå ±</div>
+          <div class="form-section-title">📌 基本情報</div>
           <div class="form-grid">
             <div class="form-group">
-              <label>è¨¼å¸ã³ã¼ã *</label>
-              <input type="text" id="f-code" placeholder="ä¾ï¼8058 / VYM" required>
+              <label>証券コード *</label>
+              <input type="text" id="f-code" placeholder="例：8058 / VYM" required>
             </div>
             <div class="form-group">
-              <label>éæå *</label>
-              <input type="text" id="f-name" placeholder="ä¾ï¼ä¸è±åäº" required>
+              <label>銘柄名 *</label>
+              <input type="text" id="f-name" placeholder="例：三菱商事" required>
             </div>
             <div class="form-group">
-              <label>å¸å ´</label>
+              <label>市場</label>
               <select id="f-market" onchange="onMarketChange()">
-                <option value="japan">æ¥æ¬æ ª</option>
-                <option value="us">ç±³å½æ ª</option>
-                <option value="other">ãã®ä»</option>
+                <option value="japan">日本株</option>
+                <option value="us">米国株</option>
+                <option value="other">その他</option>
               </select>
             </div>
             <div class="form-group">
-              <label>ã»ã¯ã¿ã¼</label>
+              <label>セクター</label>
               <select id="f-sector"></select>
             </div>
             <div class="form-group">
-              <label>ç¨®å¥</label>
+              <label>種別</label>
               <select id="f-category">
-                <option value="defensive">ãã£ãã§ã³ã·ã</option>
-                <option value="cyclical">æ¯æ°ææ</option>
-                <option value="other">ãã®ä»</option>
+                <option value="defensive">ディフェンシブ</option>
+                <option value="cyclical">景気敏感</option>
+                <option value="other">その他</option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">ð° ä¿ææå ±</div>
+          <div class="form-section-title">💰 保有情報</div>
           <div class="form-grid">
             <div class="form-group">
-              <label>ä¿ææ ªæ°</label>
+              <label>保有株数</label>
               <input type="number" id="f-shares" min="0" step="1" placeholder="0">
             </div>
             <div class="form-group">
-              <label>è³¼å¥åä¾¡ï¼åï¼</label>
+              <label>購入単価（円）</label>
               <input type="number" id="f-purchase-price" min="0" placeholder="0">
             </div>
             <div class="form-group">
-              <label>ç¾å¨æ ªä¾¡ï¼åï¼</label>
+              <label>現在株価（円）</label>
               <input type="number" id="f-current-price" min="0" placeholder="0">
             </div>
             <div class="form-group" id="fg-div-usd">
-              <label>å¹´é1æ ªéå½ï¼USDã»TTMï¼</label>
-              <input type="number" id="f-div-usd" min="0" step="0.0001" placeholder="ä¾: 2.16" oninput="updateDivFromUsd()">
+              <label>年間1株配当（USD・TTM）</label>
+              <input type="number" id="f-div-usd" min="0" step="0.0001" placeholder="例: 2.16" oninput="updateDivFromUsd()">
               <span class="metric-hint" id="div-usd-hint" style="color:var(--success)"></span>
             </div>
             <div class="form-group">
-              <label id="lbl-dividend">å¹´ééå½ï¼å/æ ªï¼</label>
+              <label id="lbl-dividend">年間配当（円/株）</label>
               <input type="number" id="f-dividend" min="0" step="0.01" placeholder="0">
             </div>
             <div class="form-group">
-              <label>éå½é »åº¦</label>
+              <label>配当頻度</label>
               <select id="f-div-frequency">
-                <option value="4">ååæï¼å¹´4åï¼</option>
-                <option value="12">ææ¬¡ï¼å¹´12åï¼</option>
-                <option value="2">åæï¼å¹´2åï¼</option>
-                <option value="1">å¹´æ¬¡ï¼å¹´1åï¼</option>
+                <option value="4">四半期（年4回）</option>
+                <option value="12">月次（年12回）</option>
+                <option value="2">半期（年2回）</option>
+                <option value="1">年次（年1回）</option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">ð IRãã³ã¯åæææ¨ï¼ä»»æï¼</div>
+          <div class="form-section-title">📈 IRバンク分析指標（任意）</div>
           <p style="font-size:11px;color:var(--muted);margin-bottom:12px">
-            <a href="https://irbank.net" target="_blank">IRBank</a> ã§èª¿ã¹ãæå ±ãå¥åãã¦ã¹ã³ã¢ãç®åºãã¾ã
+            <a href="https://irbank.net" target="_blank">IRBank</a> で調べた情報を入力してスコアを算出します
           </p>
           <div class="form-grid">
             <div class="form-group">
-              <label>â  å£²ä¸é«ãã¬ã³ã</label>
+              <label>① 売上高トレンド</label>
               <div class="trend-select" id="ts-revenue">
-                <input type="radio" name="rev" id="rev--2" value="-2"><label for="rev--2">æ¥ä¸è½</label>
-                <input type="radio" name="rev" id="rev--1" value="-1"><label for="rev--1">ä¸è½</label>
-                <input type="radio" name="rev" id="rev-0" value="0" checked><label for="rev-0">æ¨ªã°ã</label>
-                <input type="radio" name="rev" id="rev-1" value="1"><label for="rev-1">ä¸æ</label>
-                <input type="radio" name="rev" id="rev-2" value="2"><label for="rev-2">æ¥ä¸æ</label>
+                <input type="radio" name="rev" id="rev--2" value="-2"><label for="rev--2">急下落</label>
+                <input type="radio" name="rev" id="rev--1" value="-1"><label for="rev--1">下落</label>
+                <input type="radio" name="rev" id="rev-0" value="0" checked><label for="rev-0">横ばい</label>
+                <input type="radio" name="rev" id="rev-1" value="1"><label for="rev-1">上昇</label>
+                <input type="radio" name="rev" id="rev-2" value="2"><label for="rev-2">急上昇</label>
               </div>
             </div>
             <div class="form-group">
-              <label>â¡ EPSï¼1æ ªå©çï¼ãã¬ã³ã âæéè¦</label>
+              <label>② EPS（1株利益）トレンド ★最重要</label>
               <div class="trend-select" id="ts-eps">
-                <input type="radio" name="eps" id="eps--2" value="-2"><label for="eps--2">æ¥ä¸è½</label>
-                <input type="radio" name="eps" id="eps--1" value="-1"><label for="eps--1">ä¸è½</label>
-                <input type="radio" name="eps" id="eps-0" value="0" checked><label for="eps-0">æ¨ªã°ã</label>
-                <input type="radio" name="eps" id="eps-1" value="1"><label for="eps-1">ä¸æ</label>
-                <input type="radio" name="eps" id="eps-2" value="2"><label for="eps-2">æ¥ä¸æ</label>
+                <input type="radio" name="eps" id="eps--2" value="-2"><label for="eps--2">急下落</label>
+                <input type="radio" name="eps" id="eps--1" value="-1"><label for="eps--1">下落</label>
+                <input type="radio" name="eps" id="eps-0" value="0" checked><label for="eps-0">横ばい</label>
+                <input type="radio" name="eps" id="eps-1" value="1"><label for="eps-1">上昇</label>
+                <input type="radio" name="eps" id="eps-2" value="2"><label for="eps-2">急上昇</label>
               </div>
             </div>
             <div class="form-group">
-              <label>â¢ å¶æ¥­å©ççï¼%ï¼</label>
-              <input type="number" id="f-op-margin" placeholder="ä¾ï¼12.5" step="0.1">
-              <span class="metric-hint">10%ä»¥ä¸ã§åªç§ / 5%ä»¥ä¸ã¯è¦æ³¨æ</span>
+              <label>③ 営業利益率（%）</label>
+              <input type="number" id="f-op-margin" placeholder="例：12.5" step="0.1">
+              <span class="metric-hint">10%以上で優秀 / 5%以下は要注意</span>
             </div>
             <div class="form-group">
-              <label>â£ èªå·±è³æ¬æ¯çï¼%ï¼</label>
-              <input type="number" id="f-equity-ratio" placeholder="ä¾ï¼55.0" step="0.1">
-              <span class="metric-hint">40%ä»¥ä¸æ¨å¥¨ / 60%ä»¥ä¸ã§å®å¿</span>
+              <label>④ 自己資本比率（%）</label>
+              <input type="number" id="f-equity-ratio" placeholder="例：55.0" step="0.1">
+              <span class="metric-hint">40%以上推奨 / 60%以上で安心</span>
             </div>
             <div class="form-group">
-              <label>â¤ å¶æ¥­ã­ã£ãã·ã¥ãã­ã¼</label>
+              <label>⑤ 営業キャッシュフロー</label>
               <div class="trend-select" id="ts-cf">
-                <input type="radio" name="cf" id="cf--2" value="-2"><label for="cf--2">èµ¤å­å¤</label>
-                <input type="radio" name="cf" id="cf--1" value="-1"><label for="cf--1">ä¸å®å®</label>
-                <input type="radio" name="cf" id="cf-0" value="0" checked><label for="cf-0">æ¨ªã°ã</label>
-                <input type="radio" name="cf" id="cf-1" value="1"><label for="cf-1">é»å­</label>
-                <input type="radio" name="cf" id="cf-2" value="2"><label for="cf-2">å¢å ä¸­</label>
+                <input type="radio" name="cf" id="cf--2" value="-2"><label for="cf--2">赤字多</label>
+                <input type="radio" name="cf" id="cf--1" value="-1"><label for="cf--1">不安定</label>
+                <input type="radio" name="cf" id="cf-0" value="0" checked><label for="cf-0">暪ばい</label>
+                <input type="radio" name="cf" id="cf-1" value="1"><label for="cf-1">黒字</label>
+                <input type="radio" name="cf" id="cf-2" value="2"><label for="cf-2">増加中</label>
               </div>
             </div>
             <div class="form-group">
-              <label>â¥ ç¾éç­ã®æ¨ç§»</label>
+              <label>⑥ 現金等の推移</label>
               <div class="trend-select" id="ts-cash">
-                <input type="radio" name="cash" id="cash--2" value="-2"><label for="cash--2">æ¥æ¸å°</label>
-                <input type="radio" name="cash" id="cash--1" value="-1"><label for="cash--1">æ¸å°</label>
-                <input type="radio" name="cash" id="cash-0" value="0" checked><label for="cash-0">æ¨ªã°ã</label>
-                <input type="radio" name="cash" id="cash-1" value="1"><label for="cash-1">å¢å </label>
-                <input type="radio" name="cash" id="cash-2" value="2"><label for="cash-2">æ¥å¢å </label>
+                <input type="radio" name="cash" id="cash--2" value="-2"><label for="cash--2">急減少</label>
+                <input type="radio" name="cash" id="cash--1" value="-1"><label for="cash--1">減少</label>
+                <input type="radio" name="cash" id="cash-0" value="0" checked><label for="cash-0">横ばい</label>
+                <input type="radio" name="cash" id="cash-1" value="1"><label for="cash-1">増加</label>
+                <input type="radio" name="cash" id="cash-2" value="2"><label for="cash-2">急増加</label>
               </div>
             </div>
             <div class="form-group">
-              <label>â¦ éå½éãã¬ã³ã</label>
+              <label>⑦ 配当金トレンド</label>
               <div class="trend-select" id="ts-div">
-                <input type="radio" name="divt" id="divt--2" value="-2"><label for="divt--2">å¤§å¹æ¸é</label>
-                <input type="radio" name="divt" id="divt--1" value="-1"><label for="divt--1">æ¸é</label>
-                <input type="radio" name="divt" id="divt-0" value="0" checked><label for="divt-0">å®å®</label>
-                <input type="radio" name="divt" id="divt-1" value="1"><label for="divt-1">å¢é</label>
-                <input type="radio" name="divt" id="divt-2" value="2"><label for="divt-2">é£ç¶å¢é</label>
+                <input type="radio" name="divt" id="divt--2" value="-2"><label for="divt--2">大幅減配</label>
+                <input type="radio" name="divt" id="divt--1" value="-1"><label for="divt--1">減配</label>
+                <input type="radio" name="divt" id="divt-0" value="0" checked><label for="divt-0">安定</label>
+                <input type="radio" name="divt" id="divt-1" value="1"><label for="divt-1">増配</label>
+                <input type="radio" name="divt" id="divt-2" value="2"><label for="divt-2">連続増配</label>
               </div>
             </div>
             <div class="form-group">
-              <label>â§ éå½æ§åï¼%ï¼</label>
-              <input type="number" id="f-payout" placeholder="ä¾ï¼42.0" step="0.1">
-              <span class="metric-hint">30ã50%ãå¥å¨ / 70%è¶ã¯æ³¨æ</span>
+              <label>⑧ 配当性向（%）</label>
+              <input type="number" id="f-payout" placeholder="例：42.0" step="0.1">
+              <span class="metric-hint">30〜50%が健全 / 70%超は注意</span>
             </div>
             <div class="form-group">
-              <label>â¨ PBRï¼æ ªä¾¡ç´è³ç£åçï¼<small style="color:var(--muted)">ãã³ã¨æ ªæ¡ä»¶</small></label>
-              <input type="number" id="f-pbr" placeholder="ä¾ï¼0.8" step="0.01" min="0">
-              <span class="metric-hint">0.5ã1.5åãçæ³ / 1.5è¶ã¯å²é«ã®å¯è½æ§</span>
+              <label>⑨ PBR（株価純資産倍率）<small style="color:var(--muted)">こびと株条件</small></label>
+              <input type="number" id="f-pbr" placeholder="例：0.8" step="0.01" min="0">
+              <span class="metric-hint">0.5〜1.5倍が理想 / 1.5超は割高の可能性</span>
             </div>
             <div class="form-group">
-              <label>â© æµåæ¯çï¼%ï¼<small style="color:var(--muted)">ãã³ã¨æ ªæ¡ä»¶</small></label>
-              <input type="number" id="f-current-ratio" placeholder="ä¾ï¼220" step="1" min="0">
-              <span class="metric-hint">200%ä»¥ä¸ãçæ³ / 100%æªæºã¯ç­ææ¯æãè½åã«æ³¨æ</span>
+              <label>⑩ 流動比率（%）<small style="color:var(--muted)">こびと株条件</small></label>
+              <input type="number" id="f-current-ratio" placeholder="例：220" step="1" min="0">
+              <span class="metric-hint">200%以上が理想 / 100%未満は短期支払い能力に注意</span>
             </div>
             <div class="form-group">
-              <label>âª å¢éç 3å¹´å¹³åï¼%ï¼<small style="color:var(--accent);font-weight:600">âéè¦</small></label>
-              <input type="number" id="f-div-growth3y" placeholder="ä¾ï¼5.2" step="0.1" min="-99">
-              <span class="metric-hint">IRBankéå½æ¨ç§»ããè¨ç®ã5%ä»¥ä¸ã§åªç§ / 3%ä»¥ä¸ã§åæ ¼ã©ã¤ã³ / ãã¤ãã¹ã¯æ¸é</span>
+              <label>⑪ 増配率 3年平均（%）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-div-growth3y" placeholder="例：5.2" step="0.1" min="-99">
+              <span class="metric-hint">IRBank配当推移から計算。5%以上で優秀 / 3%以上で合格ライン / マイナスは減配</span>
             </div>
             <div class="form-group">
-              <label>â« å¢éç 5å¹´å¹³åï¼%ï¼<small style="color:var(--accent);font-weight:600">âéè¦</small></label>
-              <input type="number" id="f-div-growth5y" placeholder="ä¾ï¼4.8" step="0.1" min="-99">
-              <span class="metric-hint">é·æå¢éãã¬ã³ãã®å®å®æ§ãç¤ºãã3å¹´ã¨ã®ä¹é¢ãå¤§ããå ´åã¯è¿å¹´ã®å¤åã«æ³¨æ</span>
+              <label>⑫ 増配率 5年平均（%）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-div-growth5y" placeholder="例：4.8" step="0.1" min="-99">
+              <span class="metric-hint">長期増配トレンドの安定性を示す。3年との乖離が大きい場合は近年の変化に注意</span>
             </div>
             <div class="form-group">
-              <label>â¬ é£ç¶å¢éå¹´æ°ï¼å¹´ï¼<small style="color:var(--accent);font-weight:600">âéè¦</small></label>
-              <input type="number" id="f-consecutive-yrs" placeholder="ä¾ï¼10" step="1" min="0">
-              <span class="metric-hint">10å¹´ä»¥ä¸ã§ãé£ç¶å¢éæ ªãã20å¹´ä»¥ä¸ã¯è¶åªè¯ããªã¼ãã³ã»ã³ã­ããä¹ãè¶ãããç¢ºèª</span>
+              <label>⑬ 連続増配年数（年）<small style="color:var(--accent);font-weight:600">★重要</small></label>
+              <input type="number" id="f-consecutive-yrs" placeholder="例：10" step="1" min="0">
+              <span class="metric-hint">10年以上で「連続増配株」。20年以上は超優良。リーマン・コロナも乗り越えたか確認</span>
             </div>
             <div class="form-group full">
-              <label>ã¡ã¢</label>
-              <textarea id="f-memo" placeholder="æè³çç±ãæ°ã«ãªãç¹ãªã©èªç±ã«è¨é²"></textarea>
+              <label>メモ</label>
+              <textarea id="f-memo" placeholder="投資理由、気になる点など自由に記録"></textarea>
             </div>
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal()">ã­ã£ã³ã»ã«</button>
-      <button class="btn btn-primary" onclick="saveStock()">ð¾ ä¿å­ãã</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveStock()">💾 保存する</button>
     </div>
   </div>
 </div>
@@ -801,8 +779,8 @@ textarea{resize:vertical;min-height:60px}
   <div class="confirm-box">
     <p id="confirm-msg"></p>
     <div class="btn-row">
-      <button class="btn btn-outline" onclick="closeConfirm()">ã­ã£ã³ã»ã«</button>
-      <button class="btn btn-danger btn-sm" id="confirm-ok">åé¤ãã</button>
+      <button class="btn btn-outline" onclick="closeConfirm()">キャンセル</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok">削除する</button>
     </div>
   </div>
 </div>
@@ -810,23 +788,23 @@ textarea{resize:vertical;min-height:60px}
 <script>
 // ==================== DATA ====================
 const SECTORS = [
-  {name:'é£æå',type:'defensive'},{name:'å»è¬å',type:'defensive'},
-  {name:'é»æ°ã»ã¬ã¹',type:'defensive'},{name:'é¸é',type:'defensive'},
-  {name:'éä¿¡',type:'defensive'},{name:'æå ±ã»éä¿¡',type:'other'},
-  {name:'éè¡æ¥­',type:'other'},{name:'ä¿éºæ¥­',type:'other'},
-  {name:'è¨¼å¸ã»åååç©',type:'other'},{name:'ãã®ä»éè',type:'other'},
-  {name:'ä¸åç£',type:'other'},{name:'å»ºè¨­æ¥­',type:'other'},
-  {name:'éé¼',type:'cyclical'},{name:'åå­¦',type:'cyclical'},
-  {name:'æ©æ¢°',type:'cyclical'},{name:'è¼¸éç¨æ©å¨',type:'cyclical'},
-  {name:'é»æ°æ©å¨',type:'cyclical'},{name:'ç²¾å¯æ©å¨',type:'other'},
-  {name:'ãã®ä»è£½å',type:'other'},{name:'å¸å£²æ¥­',type:'cyclical'},
-  {name:'å°å£²æ¥­',type:'other'},{name:'é±æ¥­',type:'cyclical'},
-  {name:'ç³æ²¹ã»ç³ç­',type:'cyclical'},{name:'ãã«ãã»ç´',type:'cyclical'},
-  {name:'ã´ã è£½å',type:'other'},{name:'ã¬ã©ã¹ã»åç³',type:'other'},
-  {name:'éééå±',type:'cyclical'},{name:'ååº«ã»éè¼¸é¢é£',type:'other'},
-  {name:'ãµã¼ãã¹æ¥­',type:'other'},{name:'æ°´ç£ã»è¾²ææ¥­',type:'other'},
-  {name:'ç¹ç¶­è£½å',type:'other'},{name:'ETFï¼ç±³å½ï¼',type:'other'},
-  {name:'ãã®ä»',type:'other'}
+  {name:'食料品',type:'defensive'},{name:'医薬品',type:'defensive'},
+  {name:'電気・ガス',type:'defensive'},{name:'陸運',type:'defensive'},
+  {name:'通信',type:'defensive'},{name:'情報・通信',type:'other'},
+  {name:'銀行業',type:'other'},{name:'保険業',type:'other'},
+  {name:'証券・商品先物',type:'other'},{name:'その他金融',type:'other'},
+  {name:'不動産',type:'other'},{name:'建設業',type:'other'},
+  {name:'鉄鋼',type:'cyclical'},{name:'化学',type:'cyclical'},
+  {name:'機械',type:'cyclical'},{name:'輸送用機器',type:'cyclical'},
+  {name:'電気機器',type:'cyclical'},{name:'精密機器',type:'other'},
+  {name:'その他製品',type:'other'},{name:'卸売業',type:'cyclical'},
+  {name:'小売業',type:'other'},{name:'鉱業',type:'cyclical'},
+  {name:'石油・石炭',type:'cyclical'},{name:'パルプ・紙',type:'cyclical'},
+  {name:'ゴム製品',type:'other'},{name:'ガラス・土石',type:'other'},
+  {name:'非鉄金属',type:'cyclical'},{name:'倉庫・運輸関連',type:'other'},
+  {name:'サービス業',type:'other'},{name:'水産・農林業',type:'other'},
+  {name:'繊維製品',type:'other'},{name:'ETF（米国）',type:'other'},
+  {name:'その他',type:'other'}
 ];
 
 const SECTOR_COLORS = [
@@ -867,121 +845,121 @@ function loadData() {
     } catch(e) { state.stocks = []; state.watchlist = []; return; }
   }
   state.watchlist = [];
-  // ãã¼ããã©ãªãªåæãã¼ã¿ï¼2026-04-02 åãè¾¼ã¿ï¼
-    // â» æ ªä¾¡ã»åå¾åä¾¡ã¯ã¢ããªç»åããç®åºããæ¦ç®å¤ãç¾å¨å¤ã¯è¦ç¢ºèªã
-    // â» äºæ³éå½ï¼å/æ ª/å¹´ï¼ã¯ç»åè¨è¼å¤ãéå½å©åãããç¾å¨æ ªä¾¡ãéç®ã
+  // ポートフォリオ初期データ（2026-04-02 取り込み）
+    // ※ 株価・取得単価はアプリ画像から算出した概算値。現在値は要確認。
+    // ※ 予想配当（円/株/年）は画像記載値。配当利回りから現在株価を逆算。
     state.stocks = [
-      // âââ å¨ä¸çã»ç±³å½å¸å ´ ETF âââ
-      {id:'p1', code:'VT',   name:'ãã³ã¬ã¼ãã»ãã¼ã¿ã«ã»ã¯ã¼ã«ãã¹ããã¯ ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'other',
+      // ─── 全世界・米国市場 ETF ───
+      {id:'p1', code:'VT',   name:'バンガード・トータル・ワールドストック ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
        shares:37, purchasePrice:11224, currentPrice:22568, dividend:406.22,
        divPerShareUsd:2.71, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
-       memo:'å¨ä¸çæ ªETFãéå½å©åã1.80%ãéå½äºå®:3æ6æ9æ12æãå¹´å©3.53%', updatedAt:'2026-04-02'},
+       memo:'全世界株ETF。配当利回り1.80%。配当予定:3月6月9月12月。年利3.53%', updatedAt:'2026-04-02'},
 
-      {id:'p5', code:'VOO',  name:'ãã³ã¬ã¼ã S&P500 ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'other',
+      {id:'p5', code:'VOO',  name:'バンガード S&P500 ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
        shares:2, purchasePrice:49031, currentPrice:98745, dividend:1115.81,
        divPerShareUsd:7.44, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
-       memo:'S&P500 ETFãéå½å©åã1.13%ãéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'S&P500 ETF。配当利回り1.13%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      {id:'p6', code:'SPLG', name:'SPDR ãã¼ããã©ãªãªS&P500 ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'other',
+      {id:'p6', code:'SPLG', name:'SPDR ポートフォリオS&P500 ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
        shares:12, purchasePrice:19243, currentPrice:27527, dividend:308.30,
        divPerShareUsd:2.05, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
-       memo:'S&P500ä½ã³ã¹ãETFãéå½å©åã1.12%ãéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'S&P500低コストETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      {id:'p7', code:'VTI',  name:'ãã³ã¬ã¼ãã»ãã¼ã¿ã«ã»ã¹ããã¯ãã¼ã±ãã ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'other',
+      {id:'p7', code:'VTI',  name:'バンガード・トータル・ストックマーケット ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
        shares:19, purchasePrice:26882, currentPrice:52946, dividend:593.00,
        divPerShareUsd:3.95, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:2, payoutRatio:0,
-       memo:'ç±³å½æ ªå¼å¨ä½ETFãéå½å©åã1.12%ãéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'米国株式全体ETF。配当利回り1.12%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      // âââ ã°ã­ã¼ã¹ ETF âââ
-      {id:'p8', code:'QQQ',  name:'ã¤ã³ãã¹ã³QQQ ä¿¡è¨ã·ãªã¼ãº1',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      // ─── グロース ETF ───
+      {id:'p8', code:'QQQ',  name:'インベスコQQQ 信託シリーズ1',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:9, purchasePrice:25684, currentPrice:78306, dividend:360.21,
        divPerShareUsd:2.40, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
-       memo:'NASDAQ100 ETFãéå½å©åã0.46%ãéå½äºå®:3æ6æ9æ12æãæ ªæ°ã¯æ¦ç®ï¼è¦ç¢ºèªï¼', updatedAt:'2026-04-02'},
+       memo:'NASDAQ100 ETF。配当利回り0.46%。配当予定:3月6月9月12月。株数は概算（要確認）', updatedAt:'2026-04-02'},
 
-      {id:'p9', code:'VUG',  name:'ãã³ã¬ã¼ã ç±³å½ã°ã­ã¼ã¹ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      {id:'p9', code:'VUG',  name:'バンガード 米国グロースETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:7, purchasePrice:35038, currentPrice:73793, dividend:317.31,
        divPerShareUsd:2.12, divFrequency:4,
        revenueTrend:2, epsTrend:2, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:2, divTrend:1, payoutRatio:0,
-       memo:'ç±³å½ã°ã­ã¼ã¹æ ªETFãéå½å©åã0.43%ãéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'米国グロース株ETF。配当利回り0.43%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      // âââ é«éå½ ETF âââ
-      {id:'p12', code:'SPYD', name:'SPDR ãã¼ããã©ãªãªS&P500 é«éå½æ ªå¼ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'defensive',
+      // ─── 高配当 ETF ───
+      {id:'p12', code:'SPYD', name:'SPDR ポートフォリオS&P500 高配当株式ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
        shares:40, purchasePrice:8098, currentPrice:7358, dividend:308.30,
        divPerShareUsd:2.05, divFrequency:4,
        revenueTrend:1, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'é«éå½S&P500 ETFãéå½å©åã4.19%ãå«æãããéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'高配当S&P500 ETF。配当利回り4.19%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      {id:'p13', code:'VYM',  name:'ãã³ã¬ã¼ã ç±³å½é«éå½æ ªå¼ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'defensive',
+      {id:'p13', code:'VYM',  name:'バンガード 米国高配当株式ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
        shares:10, purchasePrice:20420, currentPrice:16650, dividend:547.79,
        divPerShareUsd:3.65, divFrequency:4,
        revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:2, payoutRatio:0,
-       memo:'ç±³å½é«éå½ETFä»£è¡¨æ ¼ãéå½å©åã3.29%ãå«æãããéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'米国高配当ETF代表格。配当利回り3.29%。含損あり。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      {id:'p14', code:'HDV',  name:'iã·ã§ã¢ã¼ãº ã³ã¢ç±³å½é«éå½æ ªETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'defensive',
+      {id:'p14', code:'HDV',  name:'iシェアーズ コア米国高配当株ETF',
+       market:'us', sector:'ETF（米国）', category:'defensive',
        shares:13, purchasePrice:18412, currentPrice:21444, dividend:617.44,
        divPerShareUsd:4.12, divFrequency:4,
        revenueTrend:1, epsTrend:1, opMargin:0, equityRatio:0, cfTrend:2, cashTrend:1, divTrend:1, payoutRatio:0,
-       memo:'ç±³å½é«éå½ETFãéå½å©åã2.88%ãéå½äºå®:3æ6æ9æ12æ', updatedAt:'2026-04-02'},
+       memo:'米国高配当ETF。配当利回り2.88%。配当予定:3月6月9月12月', updatedAt:'2026-04-02'},
 
-      // âââ ã«ãã¼ãã³ã¼ã« ETF âââ
-      {id:'p3', code:'QYLD', name:'ã°ã­ã¼ãã«X NASDAQ100 ã«ãã¼ãã³ã¼ã«ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      // ─── カバードコール ETF ───
+      {id:'p3', code:'QYLD', name:'グローバルX NASDAQ100 カバードコールETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:167, purchasePrice:2793, currentPrice:2783, dividend:322.63,
        divPerShareUsd:2.15, divFrequency:12,
        revenueTrend:0, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'é«åéã«ãã¼ãã³ã¼ã«ETFãéå½å©åã11.59%ãNAVéæ¸ã«æ³¨æãå¹´å©12.83%', updatedAt:'2026-04-02'},
+       memo:'高分配カバードコールETF。配当利回り11.59%。NAV逓減に注意。年利12.83%', updatedAt:'2026-04-02'},
 
-      {id:'p4', code:'QYLG', name:'ã°ã­ã¼ãã«X NASDAQ100 & ã«ãã¼ãã³ã¼ã«ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      {id:'p4', code:'QYLG', name:'グローバルX NASDAQ100 & カバードコールETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:150, purchasePrice:6914, currentPrice:6975, dividend:225,
        divPerShareUsd:1.50, divFrequency:12,
        revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:1, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'ã«ãã¼ãã³ã¼ã«50%ï¼ææ°50%ãéå½å©åãç´3.2%ï¼TTMãã¼ã¹ä¿®æ­£æ¸ï¼ãææ¬¡éå½', updatedAt:'2026-04-02'},
+       memo:'カバードコール50%＋指数50%。配当利回り約3.2%（TTMベース修正済）。月次配当', updatedAt:'2026-04-02'},
 
-      // âââ æ°èå½ã»ãã­ã³ãã£ã¢ âââ
-      {id:'p2', code:'FM',   name:'iã·ã§ã¢ã¼ãº MSCI ãã­ã³ãã£ã¢ ETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'other',
+      // ─── 新興国・フロンティア ───
+      {id:'p2', code:'FM',   name:'iシェアーズ MSCI フロンティア ETF',
+       market:'us', sector:'ETF（米国）', category:'other',
        shares:2, purchasePrice:7500, currentPrice:7500, dividend:132,
        divPerShareUsd:0.88, divFrequency:4,
        revenueTrend:0, epsTrend:0, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'ãã­ã³ãã£ã¢å¸å ´ETFãéå½å©åãç´1.8%ï¼TTMãã¼ã¹ï¼ãåå¾åä¾¡ã»ç¾å¨å¤ã¯è¦ç¢ºèª', updatedAt:'2026-04-02'},
+       memo:'フロンティア市場ETF。配当利回り約1.8%（TTMベース）。取得単価・現在値は要確認', updatedAt:'2026-04-02'},
 
-      // âââ åå¥æ ªï¼ç±³å½ï¼ âââ
-      {id:'p15', code:'ARCC', name:'ã¨ã¤ãªã¹ã»ã­ã£ãã¿ã«ï¼Ares Capitalï¼',
-       market:'us', sector:'ãã®ä»éè', category:'other',
+      // ─── 個別株（米国） ───
+      {id:'p15', code:'ARCC', name:'エイリス・キャピタル（Ares Capital）',
+       market:'us', sector:'その他金融', category:'other',
        shares:5, purchasePrice:2364, currentPrice:2951, dividend:303.10,
        divPerShareUsd:2.02, divFrequency:12,
        revenueTrend:1, epsTrend:1, opMargin:50, equityRatio:30, cfTrend:1, cashTrend:1, divTrend:1, payoutRatio:90,
-       memo:'BDCï¼ãã¸ãã¹éçºä¼ç¤¾ï¼ãéå½å©åãç´10.3%ãææ¬¡éå½ãè©ä¾¡çãã', updatedAt:'2026-04-02'},
+       memo:'BDC（ビジネス開発会社）。配当利回り約10.3%。月次配当。評価益あり', updatedAt:'2026-04-02'},
 
-      // âââ ã¬ãã¬ãã¸ETFï¼ã¦ã©ããä¸­ã»éä¿æï¼ âââ
-      {id:'p10', code:'SOXL', name:'Direxion ãã¤ãªã¼åå°ä½æ ªãã«3åETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      // ─── レバレッジETF（ウォッチ中・非保有） ───
+      {id:'p10', code:'SOXL', name:'Direxion デイリー半導体株ブル3倍ETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:0, purchasePrice:0, currentPrice:8417, dividend:22.93,
        divPerShareUsd:0.15, divFrequency:4,
        revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'åå°ä½3åãã«ETFãç¾å¨æªä¿æã»ã¦ã©ããä¸­', updatedAt:'2026-04-02'},
+       memo:'半導体3倍ブルETF。現在未保有・ウォッチ中。配彔在価做は', updatedAt:'2026-04-02'},
 
-      {id:'p11', code:'TECL', name:'Direxion ãã¤ãªã¼ãã¯ãã­ã¸ã¼æ ªãã«3åETF',
-       market:'us', sector:'ETFï¼ç±³å½ï¼', category:'cyclical',
+      {id:'p11', code:'TECL', name:'Direxion デイリーテクノロジー株ブル3倍ETF',
+       market:'us', sector:'ETF（米国）', category:'cyclical',
        shares:0, purchasePrice:0, currentPrice:16173, dividend:60,
        divPerShareUsd:0.40, divFrequency:4,
        revenueTrend:-1, epsTrend:-1, opMargin:0, equityRatio:0, cfTrend:0, cashTrend:0, divTrend:0, payoutRatio:0,
-       memo:'ãã¯ãã­ã¸ã¼3åãã«ETFãç¾å¨æªä¿æã»ã¦ã©ããä¸­ãéå½TTMãã¼ã¹ä¿®æ­£æ¸', updatedAt:'2026-04-02'},
+       memo:'テクノロジー3倍ブルETF。現在未保有・ウォッチ中。配当TTMベース修正済', updatedAt:'2026-04-02'},
     ];
     saveData();
 }
@@ -992,19 +970,22 @@ function saveData() {
   }));
 }
 
-// ==================== REALTIME PRICE FETCH ====================
+// ==================== ====================
 async function fetchPrices() {
   if (state.fetchStatus === 'loading') return;
   state.fetchStatus = 'loading';
   updateFetchStatusUI();
 
   try {
-    // CORS対応の無料FX APIを使用（プロキシ不要）
-    const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', {signal: AbortSignal.timeout(5000)});
-    const fxJson = await fxRes.json();
-    const rate = fxJson?.rates?.JPY;
-    if (rate && rate > 100 && rate < 200) { usdJpy = rate; state.usdJpy = usdJpy; }
-  } catch(e) { /* FXレートは前回値を使用 */ }
+    const proxy = url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    let usdJpy = state.usdJpy || 150;
+    try {
+      // CORS対応の無料FX APIを使用（プロキシ不要）
+      const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', {signal: AbortSignal.timeout(5000)});
+      const fxJson = await fxRes.json();
+      const rate = fxJson?.rates?.JPY;
+      if (rate && rate > 100 && rate < 200) { usdJpy = rate; state.usdJpy = usdJpy; }
+    } catch(e) { /* FXレートは前回値を使用 */ }
 
     const holdingCodes = state.stocks.map(s => {
       if (s.market === 'japan') return s.code.replace(/\.T$/, '') + '.T';
@@ -1018,7 +999,7 @@ async function fetchPrices() {
     const allCodes = [...new Set([...holdingCodes, ...watchCodes])];
     if (!allCodes.length) { state.fetchStatus = 'done'; updateFetchStatusUI(); return; }
 
-    // v7ã¯401ã¨ã©ã¼ã®ããv8/chartã§åå¥åå¾ã«åãæ¿ã
+    // v7は401エラーのためv8/chartで個別取得に切り替え
     const quoteMap = {};
     for (const sym of allCodes) {
       try {
@@ -1048,7 +1029,7 @@ async function fetchPrices() {
       const marketPrice = q.regularMarketPrice;
       if (!marketPrice) return;
       s.currentPrice = s.market === 'us' ? Math.round(marketPrice * usdJpy) : Math.round(marketPrice);
-      if (q.trailingAnnualDividendRate && q.trailingAnnualDividendRate > 0) {
+      if (q.trailingAnnualDividendRate && r.trailingAnnualDividendRate > 0) {
         if (s.market === 'us') {
           s.divPerShareUsd = Math.round(q.trailingAnnualDividendRate * 10000) / 10000;
           s.dividend = Math.round(q.trailingAnnualDividendRate * usdJpy * 100) / 100;
@@ -1079,12 +1060,12 @@ async function fetchPrices() {
 
     checkScreeningAlerts(quoteMap, usdJpy);
 
-    if (updated > 0) showToast(`â ${updated}éæã®æ ªä¾¡ãæ´æ°ãã¾ããï¼1USD = Â¥${usdJpy.toFixed(1)}ï¼`);
+    if (updated > 0) showToast(`✅ ${updated}銘柄の株価を更新しました（1USD = ¥${usdJpy.toFixed(1)}）`);
 
   } catch(err) {
     state.fetchStatus = 'error';
     updateFetchStatusUI();
-    showToast('â ä¾¡æ ¼åå¾ã«å¤±æãã¾ããããããã¯ã¼ã¯æ¥ç¶ãç¢ºèªãã¦ãã ããã');
+    showToast('❌ 価格取得に失敗しました。ネットワーク接続を確認してください。');
     console.error('fetchPrices error:', err);
   }
 }
@@ -1094,22 +1075,22 @@ function updateFetchStatusUI() {
   const statusEl = document.getElementById('fetch-status');
   if (!btn) return;
   if (state.fetchStatus === 'loading') {
-    btn.textContent = 'â³ æ´æ°ä¸­...';
+    btn.textContent = '⏳ 更新中...';
     btn.disabled = true;
   } else {
-    btn.textContent = 'ð æ ªä¾¡æ´æ°';
+    btn.textContent = '🔄 株価更新';
     btn.disabled = false;
   }
   if (statusEl) {
     if (state.lastFetchTime) {
       const t = state.lastFetchTime;
-      statusEl.textContent = `æçµæ´æ°: ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
+      statusEl.textContent = `最終更新: ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
     } else {
-      statusEl.textContent = 'æªåå¾';
+      statusEl.textContent = '未取得';
     }
   }
   const fxBadge = document.getElementById('fx-rate-badge');
-  if (fxBadge) fxBadge.textContent = `ð± 1USD=Â¥${(state.usdJpy||150).toFixed(1)}`;
+  if (fxBadge) fxBadge.textContent = `💱 1USD=¥${(state.usdJpy||150).toFixed(1)}`;
 }
 
 // ==================== EXCHANGE RATE AUTO-FETCH ====================
@@ -1130,50 +1111,19 @@ async function fetchExchangeRate() {
       });
       saveData();
     }
-  } catch(e) { /* ãã©ã¼ã«ããã¯: ããã©ã«ã150åãä½¿ç¨ */ }
-}
-
-function setAutoRefresh(minutes) {
-  if (state.autoRefreshInterval) clearInterval(state.autoRefreshInterval);
-  state.autoRefreshInterval = null;
-  const el = document.getElementById('auto-refresh-status');
-  if (el) el.textContent = minutes > 0 ? `${minutes}åãã¨èªåæ´æ°ä¸­` : 'èªåæ´æ°ãªã';
-  if (minutes > 0) {
-    state.autoRefreshInterval = setInterval(() => fetchPrices(), minutes * 60 * 1000);
-  }
-}
-
-function showToast(msg) {
-  let toast = document.getElementById('toast-msg');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'toast-msg';
-    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .3s';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
-}
-
-// ==================== DIVIDEND USD HELPERS ====================
-function onMarketChange() {
-  const mkt = document.getElementById('f-market').value;
-  const isUs = (mkt === 'us');
-  const fgUsd = document.getElementById('fg-div-usd');
-  const lblDiv = document.getElementById('lbl-dividend');
-  if (fgUsd) fgUsd.style.display = isUs ? '' : 'none';
-  if (lblDiv) lblDiv.textContent = isUs ? 'å¹´ééå½ï¼å/æ ªï¼â USDæ¬ããèªåè¨ç®' : 'å¹´ééå½ï¼å/æ ªï¼';
-}
-
-function updateDivFromUsd() {
-  const usd = parseFloat(document.getElementById('f-div-usd').value) || 0;
-  const rate = state.usdJpy || 150;
-  if (usd > 0) {
-    const jpy = Math.round(usd * rate * 100) / 100;
-    document.getElementById('f-dividend').value = jpy;
-    document.getElementById('div-usd-hint').textContent = `â Â¥${jpy.toLocaleString('ja-JP')} ï¼1USD=Â¥${rate.toFixed(1)}ï¼`;
+  } catch(e) { /����W�
+�����C��
+�胎�W�
+���� ��Ö�
+K����R������)�()�չ�ѥ���͕��ѽI��ɕ͠�����ѕ̤��(�������хє���ѽI��ɕ͡%�ѕ�م��������%�ѕ�م���хє���ѽI��ɕ͡%�ѕ�م���(���хє���ѽI��ɕ͡%�ѕ�م���ձ��(������Ё���􁑽�յ��й���������	�%�����Ѽ�ɕ�ɕ͠��х��̜��(�������������ѕ��
+��ѕ�Ѐ􁵥��ѕ̀�������������ѕ�����S�����.W�nӚZÒⵀ�耟���.W�nӚZÎ
+��T��(����������ѕ̀������(�����хє���ѽI��ɕ͡%�ѕ�م���͕�%�ѕ�م����������э�Aɥ��̠�������ѕ̀�������������(���)�()�չ�ѥ���͡��Q���С�͜���(����Ёѽ��Ѐ􁑽�յ��й���������	�%���ѽ��е�͜���(�������ѽ��Ф��(����ѽ��Ѐ􁑽�յ��й�ɕ�ѕ�����Р���؜��(����ѽ��й����ѽ��е�͜��(����ѽ��й��屔����Q��Ѐ���ͥѥ��陥ᕐ퉽�ѽ�����������������Ʌ�͙�ɴ��Ʌ�ͱ�ѕ`������퉅���ɽչ��Ɍ͔��퍽���荙��������������������퉽ɑ�ȵɅ��������홽�еͥ�������赥���������퉽�͡����������������ɝ����������̤��Ʌ�ͥѥ��������䀸�̜�(�������յ��й���久�����
+�����ѽ��Ф�(���(��ѽ��йѕ��
+��ѕ�Ѐ�͜�(��ѽ��й��屔���������Ĝ�(�������Q�����Сѽ��й}ѥ����Ф�(��ѽ��й}ѥ����Ѐ�͕�Q�����Р�������ѽ��й��屔���������������������)�((�����������������������%Y%9�UM�!1AIL���������������������)�չ�ѥ�����5�ɭ��
+���������(������Ё��Ѐ􁑽�յ��й���������	�%�������ɭ�М��م�Ք�(������Ё��Ù􀡵�Ѐ����̜��(������Ё��U͐�􁑽�յ��й���������	�%��������ص�͐���(������Ё����؀􁑽�յ��й���������	�%���������٥�������(��������U͐����U͐���屔����������Ù�����耝������(����������ؤ�����عѕ��
+��ѕ�Ѐ��Ù�����ӦZO�7��O��#�������'�@�UM���
+#�
++���.W��#��\��耟��ӦZO�7��O��#�������$��)�()�չ�ѥ�������ѕ��ɽ�U͐����(������Ё�͐�����͕���С���յ��й���������	�%�������ص�͐���م�Ք�������(������ЁɅє���хє��͑)���������(�������͐�������(��������Ё����5�Ѡ�ɽչ���͐���Ʌє��������������(�������յ��й���������	�%�������٥�������م�Ք�����(�������յ��й������ntById('div-usd-hint').textContent = `→ ¥${jpy.toLocaleString('ja-JP')} （1USD=¥${rate.toFixed(1)}）`;
   } else {
     document.getElementById('div-usd-hint').textContent = '';
   }
@@ -1193,7 +1143,7 @@ function calculateScore(s) {
   pts.dividend = Math.max(0, (s.divTrend + 2) * 2.5);           // 0-10
   const pr = parseFloat(s.payoutRatio) || 0;
   pts.payout = (pr >= 30 && pr <= 50) ? 10 : (pr > 50 && pr <= 70) ? 6 : (pr > 70 && pr <= 80) ? 2 : (pr < 30 && pr >= 15) ? 7 : pr === 0 ? 7 : 0;
-  // ãã³ã¨æ ª10æ¡ä»¶è¿½å ã¹ã³ã¢
+  // こびと株10条件追加スコア
   const pbr = parseFloat(s.pbr) || 0;
   pts.pbr = (pbr >= 0.5 && pbr <= 1.5) ? 12 : (pbr > 0 && pbr < 0.5) ? 6 : (pbr > 1.5 && pbr <= 2.0) ? 6 : pbr === 0 ? 5 : 0;
   const cr = parseFloat(s.currentRatio) || 0;
@@ -1202,12 +1152,12 @@ function calculateScore(s) {
   const cp = parseFloat(s.currentPrice) || 0;
   const yld = (cp > 0 && div > 0) ? div / cp * 100 : 0;
   pts.divYield = div === 0 ? 0 : yld >= 3.75 ? 10 : yld >= 3.0 ? 6 : yld >= 2.0 ? 3 : 0;
-  // å¢éçã¹ã³ã¢ï¼3å¹´å¹³åã»5å¹´å¹³åï¼
+  // 増配率スコア（3年平均・5年平均）
   const dg3 = parseFloat(s.divGrowth3Y) || 0;
   const dg5 = parseFloat(s.divGrowth5Y) || 0;
   const dgBest = Math.max(dg3, dg5);
   pts.divGrowth = dgBest >= 10 ? 15 : dgBest >= 7 ? 12 : dgBest >= 5 ? 10 : dgBest >= 3 ? 7 : dgBest >= 1 ? 4 : dgBest === 0 ? 5 : 0;
-  // é£ç¶å¢éå¹´æ°ã¹ã³ã¢
+  // 連続増配年数スコア
   const consYrs = parseFloat(s.consecutiveDivYrs) || 0;
   pts.consecutive = consYrs >= 20 ? 15 : consYrs >= 10 ? 12 : consYrs >= 5 ? 8 : consYrs >= 3 ? 5 : consYrs >= 1 ? 3 : consYrs === 0 ? 4 : 0;
   const total = Object.values(pts).reduce((a,b) => a+b, 0);
@@ -1215,11 +1165,11 @@ function calculateScore(s) {
 }
 
 function scoreGrade(total) {
-  if (total >= 130) return {grade:'S',label:'åªè¯éæ',cls:'score-s'};
-  if (total >= 105) return {grade:'A',label:'è¯å¥½',cls:'score-a'};
-  if (total >= 65)  return {grade:'B',label:'æ¨æº',cls:'score-b'};
-  if (total >= 45)  return {grade:'C',label:'è¦æ³¨æ',cls:'score-c'};
-  return {grade:'D',label:'è¦åæ¤è¨',cls:'score-d'};
+  if (total >= 130) return {grade:'S',label:'優良銘柄',cls:'score-s'};
+  if (total >= 105) return {grade:'A',label:'良好',cls:'score-a'};
+  if (total >= 65)  return {grade:'B',label:'標準',cls:'score-b'};
+  if (total >= 45)  return {grade:'C',label:'要注意',cls:'score-c'};
+  return {grade:'D',label:'要再検討',cls:'score-d'};
 }
 
 // ==================== PORTFOLIO STATS ====================
@@ -1267,7 +1217,7 @@ function getAlerts(stats) {
   sectors.forEach(sec => {
     const ratio = stats.totalInvest > 0 ? stats.sectorInvest[sec] / stats.totalInvest * 100 : 0;
     if (ratio > 20) {
-      alerts.push({type:'warn', icon:'â ï¸', msg:`ãã»ã¯ã¿ã¼éä¸­ã${sec} ãæè³é¡å¨ä½ã® ${ratio.toFixed(1)}% ãè¶ãã¦ãã¾ãï¼ä¸éï¼20%ï¼`});
+      alerts.push({type:'warn', icon:'⚠️', msg:`【セクター集中】${sec} が投資額全体の ${ratio.toFixed(1)}% を超えています（上限：20%）`});
     }
   });
 
@@ -1276,18 +1226,18 @@ function getAlerts(stats) {
     const annualDiv = (parseFloat(s.shares)||0) * (parseFloat(s.dividend)||0);
     const ratio = stats.totalAnnualDiv > 0 ? annualDiv / stats.totalAnnualDiv * 100 : 0;
     if (ratio > 3 && state.stocks.length >= 5) {
-      alerts.push({type:'warn', icon:'â ï¸', msg:`ãéå½éä¸­ã${s.name}ï¼${s.code}ï¼ããã®éå½ãå¨ä½ã® ${ratio.toFixed(1)}% ã§ãï¼ä¸éï¼3%ï¼`});
+      alerts.push({type:'warn', icon:'⚠️', msg:`【配当集中】${s.name}（${s.code}）からの配当が全体の ${ratio.toFixed(1)}% です（上限：3%）`});
     }
   });
 
   // Defensive < 50%
   if (stats.defRatio < 50 && state.stocks.length >= 3) {
-    alerts.push({type:'danger', icon:'ð¡ï¸', msg:`ãå®ååä½ä¸ããã£ãã§ã³ã·ãéæã®éå½æ¯çã ${stats.defRatio.toFixed(1)}% ã§ãï¼ç®æ¨ï¼50%ä»¥ä¸ï¼`});
+    alerts.push({type:'danger', icon:'🛡️', msg:`【守備力低下】ディフェンシブ銘柄の配当比率が ${stats.defRatio.toFixed(1)}% です（目標：50%以上）`});
   }
 
   // Count < 50
   if (state.stocks.length < 10) {
-    alerts.push({type:'info', icon:'ð', msg:`ãåæ£ä¸è¶³ãç¾å¨ ${state.stocks.length} éæã§ããç®æ¨ã¯50éæä»¥ä¸ãå°é¡ã»1æ ªåä½ã§ç©ã¿ä¸ãã¾ãããã`});
+    alerts.push({type:'info', icon:'📊', msg:`【分散不足】現在 ${state.stocks.length} 銘柄です。目標は50銘柄以上。少額・1株単位で積み上げましょう。`});
   }
 
   // Nanpin signals
@@ -1297,9 +1247,9 @@ function getAlerts(stats) {
     if (pp > 0 && cp > 0) {
       const drop = (pp - cp) / pp * 100;
       if (drop >= 40) {
-        alerts.push({type:'danger', icon:'ð', msg:`ããã³ãã³2åç®ã${s.name} ãè³¼å¥ä¾¡æ ¼ãã ${drop.toFixed(1)}% ä¸è½ä¸­ï¼2åç®ã®è²·ãå¢ãã¿ã¤ãã³ã°ï¼`});
+        alerts.push({type:'danger', icon:'📉', msg:`【ナンピン2回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（2回目の買い増しタイミング）`});
       } else if (drop >= 20) {
-        alerts.push({type:'warn', icon:'ð', msg:`ããã³ãã³1åç®ã${s.name} ãè³¼å¥ä¾¡æ ¼ãã ${drop.toFixed(1)}% ä¸è½ä¸­ï¼1åç®ã®è²·ãå¢ãã¿ã¤ãã³ã°ï¼`});
+        alerts.push({type:'warn', icon:'📉', msg:`【ナンピン1回目】${s.name} が購入価格から ${drop.toFixed(1)}% 下落中（1回目の買い増しタイミング）`});
       }
     }
   });
@@ -1311,7 +1261,7 @@ function getAlerts(stats) {
     if (div > 0 && cp > 0) {
       const yld = div / cp * 100;
       if (yld > 15 && s.market === 'us') {
-        alerts.push({type:'warn', icon:'â ï¸', msg:`ãéå½è¦ç¢ºèªã${s.name}ï¼${s.code}ï¼ã®éå½å©åã${yld.toFixed(1)}%ã¯ç°å¸¸å¤ã®å¯è½æ§ãããã¾ããUSD/æ ªéå½ãç¢ºèªãã¦ãã ããã`});
+        alerts.push({type:'warn', icon:'⚠️', msg:`【配当要確認】${s.name}（${s.code}）の配当利回り${yld.toFixed(1)}%は異常値の可能性があります。USD/株配当を確認してください。`});
       }
     }
   });
@@ -1325,8 +1275,8 @@ function renderDashboard() {
   const grid = document.getElementById('stat-grid');
 
   if (!stats) {
-    grid.innerHTML = '<p class="empty-state" style="grid-column:1/-1"><p>éæãç»é²ãã¦ãã ãã</p></p>';
-    document.getElementById('alerts-list').innerHTML = '<div class="no-alerts">â éæãç»é²ããã¨ã¢ã©ã¼ããè¡¨ç¤ºããã¾ã</div>';
+    grid.innerHTML = '<p class="empty-state" style="grid-column:1/-1"><p>銘柄を登録してください</p></p>';
+    document.getElementById('alerts-list').innerHTML = '<div class="no-alerts">✅ 銘柄を登録するとアラートが表示されます</div>';
     renderCharts(null);
     return;
   }
@@ -1338,41 +1288,41 @@ function renderDashboard() {
 
   grid.innerHTML = `
     <div class="stat-card">
-      <div class="label">ä¿æéææ°</div>
-      <div class="value">${stats.count}<small style="font-size:12px;font-weight:400"> éæ</small></div>
-      <div class="sub">ç®æ¨ï¼50éæä»¥ä¸</div>
+      <div class="label">保有銘柄数</div>
+      <div class="value">${stats.count}<small style="font-size:12px;font-weight:400"> 銘柄</small></div>
+      <div class="sub">目標：50銘柄以上</div>
     </div>
     <div class="stat-card">
-      <div class="label">ç·æè³é¡</div>
+      <div class="label">総投資額</div>
       <div class="value" style="font-size:17px">${fmt(stats.totalInvest)}</div>
-      <div class="sub">ç¾å¨è©ä¾¡é¡ ${fmt(stats.totalCurrent)}</div>
+      <div class="sub">現在評価額 ${fmt(stats.totalCurrent)}</div>
     </div>
     <div class="stat-card ${plCls}">
-      <div class="label">å«ã¿æç</div>
+      <div class="label">含み損益</div>
       <div class="value" style="font-size:17px">${stats.pl >= 0 ? '+' : ''}${fmt(stats.pl)}</div>
       <div class="sub">${stats.pl >= 0 ? '+' : ''}${stats.plRate.toFixed(1)}%</div>
     </div>
     <div class="stat-card good">
-      <div class="label">å¹´ééå½éï¼äºæ³ï¼</div>
+      <div class="label">年間配当金（予想）</div>
       <div class="value" style="font-size:17px">${fmt(stats.totalAnnualDiv)}</div>
-      <div class="sub">ææç® ${fmt(stats.totalAnnualDiv/12)}</div>
+      <div class="sub">月換算 ${fmt(stats.totalAnnualDiv/12)}</div>
     </div>
     <div class="stat-card">
-      <div class="label">å¹³åéå½å©åã</div>
+      <div class="label">平均配当利回り</div>
       <div class="value">${stats.yieldRate.toFixed(2)}<small style="font-size:12px;font-weight:400">%</small></div>
-      <div class="sub">ç®å®ï¼3ã4%</div>
+      <div class="sub">目安：3〜4%</div>
     </div>
     <div class="stat-card ${defCls}">
-      <div class="label">ãã£ãã§ã³ã·ãæ¯ç</div>
+      <div class="label">ディフェンシブ比率</div>
       <div class="value">${stats.defRatio.toFixed(1)}<small style="font-size:12px;font-weight:400">%</small></div>
-      <div class="sub">ç®æ¨ï¼50%ä»¥ä¸</div>
+      <div class="sub">目標：50%以上</div>
     </div>
   `;
 
   const alerts = getAlerts(stats);
   const alertsEl = document.getElementById('alerts-list');
   if (alerts.length === 0) {
-    alertsEl.innerHTML = '<div class="no-alerts">â ãã¹ã¦ã®ã«ã¼ã«ãæºããã¦ãã¾ãï¼</div>';
+    alertsEl.innerHTML = '<div class="no-alerts">✅ すべてのルールを満たしています！</div>';
   } else {
     alertsEl.innerHTML = '<div class="alerts-list">' + alerts.map(a =>
       `<div class="alert-item ${a.type}"><span class="alert-icon">${a.icon}</span>${a.msg}</div>`
@@ -1380,7 +1330,7 @@ function renderDashboard() {
   }
 
   document.getElementById('header-summary').textContent =
-    `${stats.count}éæ / å¹´ééå½ ${fmt(stats.totalAnnualDiv)}`;
+    `${stats.count}銘柄 / 年間配当 ${fmt(stats.totalAnnualDiv)}`;
 
   renderCharts(stats);
 }
@@ -1402,7 +1352,7 @@ function renderCharts(stats) {
       options: {responsive:true, plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
     });
   } else {
-    ctx1.canvas.parentElement.innerHTML += '<div class="no-data">ãã¼ã¿ãªã</div>';
+    ctx1.canvas.parentElement.innerHTML += '<div class="no-data">データなし</div>';
   }
 
   // Def vs Cyclical
@@ -1417,7 +1367,7 @@ function renderCharts(stats) {
   charts.type = new Chart(ctx2, {
     type: 'doughnut',
     data: {
-      labels: ['ãã£ãã§ã³ã·ã', 'æ¯æ°ææ', 'ãã®ä»'],
+      labels: ['ディフェンシブ', '景気敏感', 'その他'],
       datasets: [{
         data: [Math.round(defDiv), Math.round(cycDiv), Math.round(othDiv)],
         backgroundColor: ['#2e86ab','#e07b39','#7f8c8d'],
@@ -1428,7 +1378,7 @@ function renderCharts(stats) {
       responsive:true,
       plugins:{
         legend:{position:'right',labels:{font:{size:11},boxWidth:12}},
-        tooltip:{callbacks:{label: ctx => `${ctx.label}: Â¥${ctx.raw.toLocaleString()}`}}
+        tooltip:{callbacks:{label: ctx => `${ctx.label}: ¥${ctx.raw.toLocaleString()}`}}
       }
     }
   });
@@ -1446,7 +1396,7 @@ function renderCharts(stats) {
       data: {
         labels: sorted.map(x => x.name),
         datasets: [{
-          label: 'å¹´ééå½ï¼åï¼',
+          label: '年間配当（円）',
           data: sorted.map(x => Math.round(x.div)),
           backgroundColor: '#2d7dd2',
           borderRadius: 4
@@ -1456,7 +1406,7 @@ function renderCharts(stats) {
         indexAxis: 'y',
         responsive: true,
         plugins: {legend:{display:false}},
-        scales: {x:{ticks:{font:{size:10},callback: v => 'Â¥'+v.toLocaleString()}}, y:{ticks:{font:{size:10}}}}
+        scales: {x:{ticks:{font:{size:10},callback: v => '¥'+v.toLocaleString()}}, y:{ticks:{font:{size:10}}}}
       }
     });
   }
@@ -1536,10 +1486,10 @@ function renderPortfolio() {
     const score = calculateScore(s);
     const grade = scoreGrade(score.total);
     const dropPct = pp > 0 ? (pp - cp) / pp * 100 : 0;
-    const nanpin = dropPct >= 40 ? `<span class="nanpin-btn nanpin-2">2åç®â¼${dropPct.toFixed(0)}%</span>`
-                 : dropPct >= 20 ? `<span class="nanpin-btn nanpin-1">1åç®â¼${dropPct.toFixed(0)}%</span>` : '';
-    const mktBadge = s.market === 'japan' ? '<span class="market-badge market-jp">æ¥æ¬</span>' : s.market === 'us' ? '<span class="market-badge market-us">ç±³å½</span>' : '';
-    const typeBadge = s.category === 'defensive' ? '<span class="def-badge">å®å</span>' : s.category === 'cyclical' ? '<span class="cyc-badge">æ¯æ°</span>' : '';
+    const nanpin = dropPct >= 40 ? `<span class="nanpin-btn nanpin-2">2回目▼${dropPct.toFixed(0)}%</span>`
+                 : dropPct >= 20 ? `<span class="nanpin-btn nanpin-1">1回目▼${dropPct.toFixed(0)}%</span>` : '';
+    const mktBadge = s.market === 'japan' ? '<span class="market-badge market-jp">日本</span>' : s.market === 'us' ? '<span class="market-badge market-us">米国</span>' : '';
+    const typeBadge = s.category === 'defensive' ? '<span class="def-badge">守備</span>' : s.category === 'cyclical' ? '<span class="cyc-badge">景気</span>' : '';
     return `<tr>
       <td><strong>${s.code}</strong></td>
       <td>${s.name}</td>
@@ -1547,16 +1497,16 @@ function renderPortfolio() {
       <td style="font-size:12px">${s.sector}</td>
       <td>${typeBadge}</td>
       <td>${shares.toLocaleString()}</td>
-      <td>Â¥${pp.toLocaleString()}</td>
-      <td>Â¥${cp.toLocaleString()}</td>
-      <td class="${pl >= 0 ? 'pl-positive' : 'pl-negative'}">${pl >= 0 ? '+' : ''}Â¥${Math.round(pl).toLocaleString()}<small style="font-size:10px;margin-left:2px">(${plRate >= 0 ? '+' : ''}${plRate.toFixed(1)}%)</small></td>
-      <td>${yld.toFixed(2)}%<br><small style="color:var(--muted);font-size:10px">${s.divFrequency === 12 ? 'ææ¬¡' : s.divFrequency === 4 ? 'ååæ' : s.divFrequency === 2 ? 'åæ' : s.divFrequency === 1 ? 'å¹´æ¬¡' : 'ååæ'}|/small></td>
-      <td>Â¥${Math.round(annualDiv).toLocaleString()}</td>
+      <td>¥${pp.toLocaleString()}</td>
+      <td>¥${cp.toLocaleString()}</td>
+      <td class="${pl >= 0 ? 'pl-positive' : 'pl-negative'}">${pl >= 0 ? '+' : ''}¥${Math.round(pl).toLocaleString()}<small style="font-size:10px;margin-left:2px">(${plRate >= 0 ? '+' : ''}${plRate.toFixed(1)}%)</small></td>
+      <td>${yld.toFixed(2)}%<br><small style="color:var(--muted);font-size:10px">${s.divFrequency === 12 ? '月次' : s.divFrequency === 4 ? '四半期' : s.divFrequency === 2 ? '半期' : s.divFrequency === 1 ? '年次' : '四半期'}</small></td>
+      <td>¥${Math.round(annualDiv).toLocaleString()}</td>
       <td><span class="score-badge ${grade.cls}" title="${grade.label}">${grade.grade}</span><small style="font-size:10px;margin-left:4px">${score.total}</small></td>
       <td>${nanpin}</td>
       <td>
-        <button class="action-btn" onclick="openEditModal('${s.id}')" title="ç·¨é">âï¸</button>
-        <button class="action-btn" onclick="confirmDelete('${s.id}','${s.name}')" title="åé¤">ðï¸</button>
+        <button class="action-btn" onclick="openEditModal('${s.id}')" title="編集">✏️</button>
+        <button class="action-btn" onclick="confirmDelete('${s.id}','${s.name}')" title="削除">🗑️</button>
       </td>
     </tr>`;
   }).join('');
@@ -1565,14 +1515,14 @@ function renderPortfolio() {
   const secSel = document.getElementById('filter-sector');
   const curVal = secSel.value;
   const allSecs = [...new Set(state.stocks.map(s => s.sector))].sort();
-  secSel.innerHTML = '<option value="">ãã¹ã¦ã®ã»ã¯ã¿ã¼</option>' + allSecs.map(s => `<option value="${s}">${s}</option>`).join('');
+  secSel.innerHTML = '<option value="">すべてのセクター</option>' + allSecs.map(s => `<option value="${s}">${s}</option>`).join('');
   secSel.value = curVal;
 }
 
 // ==================== MODAL ====================
 function openAddModal() {
   state.editingId = null;
-  document.getElementById('modal-title').textContent = 'éæãè¿½å ';
+  document.getElementById('modal-title').textContent = '銘柄を追加';
   resetForm();
   document.getElementById('stock-modal').classList.add('open');
 }
@@ -1581,7 +1531,7 @@ function openEditModal(id) {
   const s = state.stocks.find(x => x.id === id);
   if (!s) return;
   state.editingId = id;
-  document.getElementById('modal-title').textContent = 'éæãç·¨éï¼' + s.name;
+  document.getElementById('modal-title').textContent = '銘柄を編集：' + s.name;
   resetForm();
   document.getElementById('f-id').value = s.id;
   document.getElementById('f-code').value = s.code || '';
@@ -1616,7 +1566,7 @@ function openEditModal(id) {
   onMarketChange(); // Show/hide USD field based on market
   if (s.divPerShareUsd > 0) {
     const rate = state.usdJpy || 150;
-    document.getElementById('div-usd-hint').textContent = `â Â¥${(Math.round(s.divPerShareUsd * rate * 100)/100).toLocaleString('ja-JP')} ï¼1USD=Â¥${rate.toFixed(1)}ï¼`;
+    document.getElementById('div-usd-hint').textContent = `→ ¥${(Math.round(s.divPerShareUsd * rate * 100)/100).toLocaleString('ja-JP')} （1USD=¥${rate.toFixed(1)}）`;
   }
   document.getElementById('stock-modal').classList.add('open');
 }
@@ -1649,7 +1599,7 @@ function closeModal() {
 function saveStock() {
   const code = document.getElementById('f-code').value.trim();
   const name = document.getElementById('f-name').value.trim();
-  if (!code || !name) { alert('ã³ã¼ãã¨éæåã¯å¿é ã§ã'); return; }
+  if (!code || !name) { alert('コードと銘柄名は必須です'); return; }
 
   const getRadio = name => {
     const r = document.querySelector(`input[name="${name}"]:checked`);
@@ -1704,7 +1654,7 @@ function saveStock() {
 
 // ==================== DELETE ====================
 function confirmDelete(id, name) {
-  document.getElementById('confirm-msg').textContent = `ã${name}ããåé¤ãã¾ããï¼`;
+  document.getElementById('confirm-msg').textContent = `「${name}」を削除しますか？`;
   const overlay = document.getElementById('confirm-overlay');
   overlay.classList.add('open');
   document.getElementById('confirm-ok').onclick = () => {
@@ -1725,99 +1675,72 @@ function initScreeningForm() {
   container.innerHTML = `
     <div class="form-grid">
       <div class="form-group">
-        <label>â  å£²ä¸é«ãã¬ã³ã</label>
+        <label>① 売上高トレンド</label>
         <div class="trend-select">
-          <input type="radio" name="sc-rev" id="screv--2" value="-2"><label for="screv--2">æ¥ä¸è½</label>
-          <input type="radio" name="sc-rev" id="screv--1" value="-1"><label for="screv--1">ä¸è½</label>
-          <input type="radio" name="sc-rev" id="screv-0" value="0" checked><label for="screv-0">æ¨ªã°ã</label>
-          <input type="radio" name="sc-rev" id="screv-1" value="1"><label for="screv-1">ä¸æ</label>
-          <input type="radio" name="sc-rev" id="screv-2" value="2"><label for="screv-2">æ¥ä¸æ</label>
+          <input type="radio" name="sc-rev" id="screv--2" value="-2"><label for="screv--2">急下落</label>
+          <input type="radio" name="sc-rev" id="screv--1" value="-1"><label for="screv--1">下落</label>
+          <input type="radio" name="sc-rev" id="screv-0" value="0" checked><label for="screv-0">暪ばい</label>
+          <input type="radio" name="sc-rev" id="screv-1" value="1"><label for="screv-1">上昇</label>
+          <input type="radio" name="sc-rev" id="screv-2" value="2"><label for="screv-2">急上昇</label>
         </div>
       </div>
       <div class="form-group">
-        <label>â¡ EPSï¼1æ ªå©çï¼ãã¬ã³ã âæéè¦</label>
+        <label>② EPS（1株利益）トレンド ★最重要</label>
         <div class="trend-select">
-          <input type="radio" name="sc-eps" id="sceps--2" value="-2"><label for="sceps--2">æ¥ä¸è½</label>
-          <input type="radio" name="sc-eps" id="sceps--1" value="-1"><label for="sceps--1">ä¸è½</label>
-          <input type="radio" name="sc-eps" id="sceps-0" value="0" checked><label for="sceps-0">æ¨ªã°ã</label>
-          <input type="radio" name="sc-eps" id="sceps-1" value="1"><label for="sceps-1">ä¸æ</label>
-          <input type="radio" name="sc-eps" id="sceps-2" value="2"><label for="sceps-2">æ¥ä¸æ</label>
+          <input type="radio" name="sc-eps" id="sceps--2" value="-2"><label for="sceps--2">急下落</label>
+          <input type="radio" name="sc-eps" id="sceps--1" value="-1"><label for="sceps--1">下落</label>
+          <input type="radio" name="sc-eps" id="sceps-0" value="0" checked><label for="sceps-0">横ばい</label>
+          <input type="radio" name="sc-eps" id="sceps-1" value="1"><label for="sceps-1">上昇</label>
+          <input type="radio" name="sc-eps" id="sceps-2" value="2"><label for="sceps-2">急上昇</label>
         </div>
       </div>
       <div class="form-group">
-        <label>â¢ å¶æ¥­å©ççï¼%ï¼</label>
-        <input type="number" id="sc-om" placeholder="ä¾ï¼12.5" step="0.1">
+        <label>③ 営業利益率（%）</label>
+        <input type="number" id="sc-om" placeholder="例：12.5" step="0.1">
       </div>
       <div class="form-group">
-        <label>â£ èªå·±è³æ¬æ¯çï¼%ï¼</label>
-        <input type="number" id="sc-er" placeholder="ä¾ï¼55.0" step="0.1">
+        <label>④ 自己資本比率（%）</label>
+        <input type="number" id="sc-er" placeholder="例：55.0" step="0.1">
       </div>
       <div class="form-group">
-        <label>â¤ å¶æ¥­ã­ã£ãã·ã¥ãã­ã¼</label>
+        <label>⑤ 営業キャッシュフロー</label>
         <div class="trend-select">
-          <input type="radio" name="sc-cf" id="sccf--2" value="-2"><label for="sccf--2">èµ¤å­å¤</label>
-          <input type="radio" name="sc-cf" id="sccf--1" value="-1"><label for="sccf--1">ä¸å®å®</label>
-          <input type="radio" name="sc-cf" id="sccf-0" value="0" checked><label for="sccf-0">æ¨ªã°ã</label>
-          <input type="radio" name="sc-cf" id="sccf-1" value="1"><label for="sccf-1">é»å­</label>
-          <input type="radio" name="sc-cf" id="sccf-2" value="2"><label for="sccf-2">å¢å ä¸­</label>
+          <input type="radio" name="sc-cf" id="sccf--2" value="-2"><label for="sccf--2">赤字多</label>
+          <input type="radio" name="sc-cf" id="sccf--1" value="-1"><label for="sccf--1">不安定</label>
+          <input type="radio" name="sc-cf" id="sccf-0" value="0" checked><label for="sccf-0">横ばい</label>
+          <input type="radio" name="sc-cf" id="sccf-1" value="1"><label for="sccf-1">黒字</label>
+          <input type="radio" name="sc-cf" id="sccf-2" value="2"><label for="sccf-2">増加中</label>
         </div>
       </div>
       <div class="form-group">
-        <label>â¥ ç¾éç­ã®æ¨ç§»</label>
+        <label>⑥ 現金等の推移</label>
         <div class="trend-select">
-          <input type="radio" name="sc-cash" id="sccash--2" value="-2"><label for="sccash--2">æ¥æ¸å°</label>
-          <input type="radio" name="sc-cash" id="sccash--1" value="-1"><label for="sccash--1">æ¸å°</label>
-          <input type="radio" name="sc-cash" id="sccash-0" value="0" checked><label for="sccash-0">æ¨ªã°ã</label>
-          <input type="radio" name="sc-cash" id="sccash-1" value="1"><label for="sccash-1">å¢å </label>
-          <input type="radio" name="sc-cash" id="sccash-2" value="2"><label for="sccash-2">æ¥å¢å </label>
+          <input type="radio" name="sc-cash" id="sccash--2" value="-2"><label for="sccash--2">急減少</label>
+          <input type="radio" name="sc-cash" id="sccash--1" value="-1"><label for="sccash--1">減少</label>
+          <input type="radio" name="sc-cash" id="sccash-0" value="0" checked><label for="sccash-0">横ばい</label>
+          <input type="radio" name="sc-cash" id="sccash-1" value="1"><label for="sccash-1">増加</label>
+          <input type="radio" name="sc-cash" id="sccash-2" value="2"><label for="sccash-2">急増加</label>
         </div>
       </div>
       <div class="form-group">
-        <label>â¦ éå½éãã¬ã³ã</label>
+        <label>⑦ 配当金トレンド</label>
         <div class="trend-select">
-          <input type="radio" name="sc-divt" id="scdivt--2" value="-2"><label for="scdivt--2">å¤§å¹æ¸é</label>
-          <input type="radio" name="sc-divt" id="scdivt--1" value="-1"><label for="scdivt--1">æ¸é</label>
-          <input type="radio" name="sc-divt" id="scdivt-0" value="0" checked><label for="scdivt-0">å®å®</label>
-          <input type="radio" name="sc-divt" id="scdivt-1" value="1"><label for="scdivt-1">å¢é</label>
-          <input type="radio" name="sc-divt" id="scdivt-2" value="2"><label for="scdivt-2">é£ç¶å¢é</label>
+          <input type="radio" name="sc-divt" id="scdivt--2" value="-2"><label for="scdivt--2">大幅減配</label>
+          <input type="radio" name="sc-divt" id="scdivt--1" value="-1"><label for="scdivt--1">減配</label>
+          <input type="radio" name="sc-divt" id="scdivt-0" value="0" checked><label for="scdivt-0">安定</label>
+          <input type="radio" name="sc-divt" id="scdivt-1" value="1"><label for="scdivt-1">増配</label>
+          <input type="radio" name="sc-divt" id="scdivt-2" value="2"><label for="scdivt-2">連続増配</label>
         </div>
       </div>
       <div class="form-group">
-        <label>â§ éå½æ§åï¼%ï¼</label>
-        <input type="number" id="sc-pr" placeholder="ä¾ï¼42.0" step="0.1">
+        <label>⑧ 配当性向（%）</label>
+        <input type="number" id="sc-pr" placeholder="例：42.0" step="0.1">
       </div>
       <div class="form-group">
-        <label>â¨ PBR <small style="color:var(--muted)">ãã³ã¨æ ªæ¡ä»¶</small></label>
-        <input type="number" id="sc-pbr" placeholder="ä¾ï¼0.8" step="0.01" min="0">
-        <span class="metric-hint">0.5ã1.5åãçæ³</span>
-      </div>
-      <div class="form-group">
-        <label>â© æµåæ¯çï¼%ï¼<small style="color:var(--muted)">ãã³ã¨æ ªæ¡ä»¶</small></label>
-        <input type="number" id="sc-cr" placeholder="ä¾ï¼220" step="1" min="0">
-        <span class="metric-hint">200%ä»¥ä¸ãçæ³</span>
-      </div>
-      <div class="form-group">
-        <label>ç¾å¨æ ªä¾¡ï¼åï¼<small style="color:var(--muted)">å©åãè¨ç®ç¨</small></label>
-        <input type="number" id="sc-price" placeholder="ä¾ï¼2000" step="1" min="0">
-      </div>
-      <div class="form-group">
-        <label>å¹´ééå½ï¼å/æ ªï¼<small style="color:var(--muted)">å©åãè¨ç®ç¨</small></label>
-        <input type="number" id="sc-div" placeholder="ä¾ï¼80" step="0.01" min="0">
-      </div>
-    </div>`;
-}
-
-function calcScreening() {
-  const getR = name => {
-    const r = document.querySelector(`input[name="${name}"]:checked`);
-    return r ? parseInt(r.value) : 0;
-  };
-  const sc = {
-    revenueTrend: getR('sc-rev'), epsTrend: getR('sc-eps'),
-    opMargin: parseFloat(document.getElementById('sc-om').value) || 0,
-    equityRatio: parseFloat(document.getElementById('sc-er').value) || 0,
-    cfTrend: getR('sc-cf'), cashTrend: getR('sc-cash'),
-    divTrend: getR('sc-divt'),
+        <label>⑨ PBR <small style="color:var(--muted)">こびと株条件</small></label>
+        <input type="number" id="sc-pbr" placeholder="例：0.8����ѕ�����Ĉ��������(�������������������􉵕�ɥ�����Ј���ǎpĸז7�3�B��������(������𽑥��(�������؁�����􉙽ɴ��ɽ����(��������񱅉����F�����.W��S�:�� ���$�͵������屔􉍽����مȠ����ѕ�����O�ώ�����v�����͵����𽱅����(�����������Ё�����յ��Ȉ����͌��Ȉ��������������/��h������ѕ��Ĉ��������(�������������������􉵕�ɥ�����Ј�������+�3�B��������(������𽑥��(�������؁�����􉙽ɴ��ɽ����(��������񱅉����>��r���������#���$�͵������屔􉍽����مȠ����ѕ�����"��n{�
++��#��_�R��͵����𽱅����(�����������Ё�����յ��Ȉ����͌��ɥ�����������������/��h�������ѕ��Ĉ��������(������𽑥��(�������؁�����􉙽ɴ��ɽ����(��������񱅉�����ӦZO�7��O��#�������$�͵������屔􉍽����مȠ����ѕ�����"��n{�
++��#��_�R��͵����𽱅����(�����������Ё�����յ��Ȉ����͌���؈��������������/��h�����ѕ�����Ĉ��������(������𽑥��(����𽑥����)�()�չ�ѥ�������M�ɕ���������(������Ё���H�􁹅�������(��������ЁȀ􁑽�յ��й�Օ��M����ѽȡ������m�����������t鍡��������(����ɕ��ɸ�Ȁ�����͕%�Сȹم�Ք�����(����(������Ё͌���(����ɕٕ�ՕQɕ��聝��H��͌�ɕ؜������Qɕ��聝��H��͌���̜��(������5�ɝ������͕���С���յ��й���������	�%���͌������م�Ք�������(������ե��I�ѥ�����͕���С���յ��й���������	�%���͌��Ȝ��م�Ք�������(������Qɕ��聝��H��͌���������͡Qɕ��聝��H��͌���͠���(�������Qɕ��聝��H�sc-divt'),
     payoutRatio: parseFloat(document.getElementById('sc-pr').value) || 0,
     pbr: parseFloat(document.getElementById('sc-pbr').value) || 0,
     currentRatio: parseFloat(document.getElementById('sc-cr').value) || 0,
@@ -1826,8 +1749,8 @@ function calcScreening() {
   };
   const score = calculateScore(sc);
   const grade = scoreGrade(score.total);
-  const name = document.getElementById('sc-name').value || 'ï¼åç§°æªå¥åï¼';
-  const code = document.getElementById('sc-code').value || 'â';
+  const name = document.getElementById('sc-name').value || '（名称未入力）';
+  const code = document.getElementById('sc-code').value || '—';
 
   const barColor = (v, max) => {
     const pct = v / max * 100;
@@ -1835,19 +1758,19 @@ function calcScreening() {
   };
 
   const items = [
-    {label:'â  å£²ä¸é«', pts: score.pts.revenue, max: 10},
-    {label:'â¡ EPS â', pts: score.pts.eps, max: 20},
-    {label:'â¢ å¶æ¥­å©çç', pts: score.pts.opMargin, max: 15},
-    {label:'â£ èªå·±è³æ¬æ¯ç', pts: score.pts.equity, max: 15},
-    {label:'â¤ å¶æ¥­CF', pts: score.pts.cf, max: 15},
-    {label:'â¥ ç¾éæ¨ç§»', pts: score.pts.cash, max: 5},
-    {label:'â¦ éå½ãã¬ã³ã', pts: score.pts.dividend, max: 10},
-    {label:'â§ éå½æ§å', pts: score.pts.payout, max: 10},
-    {label:'â¨ PBR', pts: score.pts.pbr, max: 12},
-    {label:'â© æµåæ¯ç', pts: score.pts.currentRatio, max: 12},
-    {label:'éå½å©åã', pts: score.pts.divYield, max: 10},
-    {label:'âª å¢éç(3/5å¹´)', pts: score.pts.divGrowth, max: 15},
-    {label:'â« é£ç¶å¢éå¹´æ°', pts: score.pts.consecutive, max: 15},
+    {label:'① 売上高', pts: score.pts.revenue, max: 10},
+    {label:'② EPS ★', pts: score.pts.eps, max: 20},
+    {label:'③ 営業利益率', pts: score.pts.opMargin, max: 15},
+    {label:'④ 自�zX��本比率', pts: score.pts.equity, max: 15},
+    {label:'⑤ 営業CF', pts: score.pts.cf, max: 15},
+    {label:'⑥ 現金推移', pts: score.pts.cash, max: 5},
+    {label:'⑦ 配当トレンド', pts: score.pts.dividend, max: 10},
+    {label:'⑧ 配当性向', pts: score.pts.payout, max: 10},
+    {label:'⑨ PBR', pts: score.pts.pbr, max: 12},
+    {label:'⑩ 流動比率', pts: score.pts.currentRatio, max: 12},
+    {label:'配当利回り', pts: score.pts.divYield, max: 10},
+    {label:'⑪ 増配率(3/5年)', pts: score.pts.divGrowth, max: 15},
+    {label:'⑫ 連続増配年数', pts: score.pts.consecutive, max: 15},
   ];
 
   const barsHtml = items.map(item => `
@@ -1866,12 +1789,12 @@ function calcScreening() {
   const divVal = parseFloat(document.getElementById('sc-div').value) || 0;
   const yldVal = priceVal > 0 && divVal > 0 ? divVal / priceVal * 100 : 0;
   const checks = [
-    {ok: omVal >= 10 || omVal === 0, label:`å¶æ¥­å©çç ${omVal}%`, hint: omVal < 5 && omVal > 0 ? '5%æªæºã¯è¦æ³¨æ' : omVal < 10 && omVal > 0 ? '10%ä»¥ä¸ãçæ³ï¼ãã³ã¨æ ªæ¡ä»¶ï¼' : ''},
-    {ok: erVal >= 50 || erVal === 0, label:`èªå·±è³æ¬æ¯ç ${erVal}%`, hint: erVal < 40 && erVal > 0 ? '40%æªæºã¯è¦æ³¨æ' : erVal < 50 && erVal > 0 ? '50%ä»¥ä¸ããã³ã¨æ ªåºæº' : ''},
-    {ok: prVal >= 30 && prVal <= 70 || prVal === 0, label:`éå½æ§å ${prVal}%`, hint: prVal > 70 ? '70%è¶ã¯æ¸éãªã¹ã¯å¤§' : prVal < 30 && prVal > 0 ? 'éåå§¿å¢ãè¦ç¢ºèª' : ''},
-    {ok: (pbrVal >= 0.5 && pbrVal <= 1.5) || pbrVal === 0, label:`PBR ${pbrVal}å`, hint: pbrVal > 1.5 ? '1.5è¶ã¯å²é«ã®å¯è½æ§ï¼ãã³ã¨æ ªæ¡ä»¶å¤ï¼' : pbrVal > 0 && pbrVal < 0.5 ? '0.5æªæºã¯å²å®ããã»æ¥­ç¸¾æªåæ³¨æ' : ''},
-    {ok: crVal >= 200 || crVal === 0, label:`æµåæ¯ç ${crVal}%`, hint: crVal < 100 && crVal > 0 ? '100%æªæºã¯ç­ææ¯æãè½åã«æ³¨æ' : crVal < 200 && crVal > 0 ? '200%ä»¥ä¸ããã³ã¨æ ªåºæº' : ''},
-    {ok: yldVal >= 3.75 || yldVal === 0, label:`éå½å©åã ${yldVal.toFixed(2)}%`, hint: yldVal > 0 && yldVal < 3.75 ? '3.75%ä»¥ä¸ããã³ã¨æ ªåºæºï¼ç¨å¼å¾3%ç¸å½ï¼' : ''},
+    {ok: omVal >= 10 || omVal === 0, label:`営業利益率 ${omVal}%`, hint: omVal < 5 && omVal > 0 ? '5%未満は要注意' : omVal < 10 && omVal > 0 ? '10%以上が理想（こびと株条件）' : ''},
+    {ok: erVal >= 50 || erVal === 0, label:`自�zX��本比率 ${erVal}%`, hint: erVal < 40 && erVal > 0 ? '40%未満は要注意' : erVal < 50 && erVal > 0 ? '50%以上がこびと株基準' : ''},
+    {ok: prVal >= 30 && prVal <= 70 || prVal === 0, label:`配当性向 ${prVal}%`, hint: prVal > 70 ? '70%超は減配リスク大' : prVal < 30 && prVal > 0 ? '還元姿勢を要確認' : ''},
+    {ok: (pbrVal >= 0.5 && pbrVal <= 1.5) || pbrVal === 0, label:`PBR ${pbrVal}倍`, hint: pbrVal > 1.5 ? '1.5超は割高の可能性（こびと株条件外）' : pbrVal > 0 && pbrVal < 0.5 ? '0.5未満は割安すナ・業績悪化注意' : ''},
+    {ok: crVal >= 200 || crVal === 0, label:`流動比率 ${crVal}%`, hint: crVal < 100 && crVal > 0 ? '100%未満は短期支払い能力に注意' : crVal < 200 && crVal > 0 ? '200%以上がこびと株基準' : ''},
+    {ok: yldVal >= 3.75 || yldVal === 0, label:`配当利回り ${yldVal.toFixed(2)}%`, hint: yldVal > 0 && yldVal < 3.75 ? '3.75%以上がこびと株基準（税引後3%相当）' : ''},
   ];
 
   const resultEl = document.getElementById('screening-result');
@@ -1881,21 +1804,21 @@ function calcScreening() {
       <div class="score-display">
         <div class="score-big">${score.total}</div>
         <div class="score-info">
-          <div class="grade">${grade.grade}ã©ã³ã¯ â ${grade.label}</div>
+          <div class="grade">${grade.grade|ランク — ${grade.label}</div>
           <div class="verdict">${code} ${name}</div>
           <div style="margin-top:8px;font-size:12px;opacity:.85">
-            ${score.total >= 80 ? 'â åªè¯éæã®å¯è½æ§ããã¼ããã©ãªãªã¸ã®è¿½å ãæ¤è¨ã§ãã¾ãã' :
-              score.total >= 65 ? 'ð¡ è¯å¥½ãªéæãè¿½å ææ¨ãåããã¦ç¢ºèªãã¾ãããã' :
-              score.total >= 50 ? 'â ï¸ ä¸é¨ã«æ¸å¿µãããç¶ç¶çãªã¢ãã¿ãªã³ã°ãå¿è¦ã§ãã' :
-              'â è¤æ°ã®ææ¨ã§åºæºãä¸åã£ã¦ãã¾ããåæ¤è¨ãæ¨å¥¨ãã¾ãã'}
+            ${score.total >= 80 ? '✅ 優良銘柄の可能性。ポートフォリオへの追加を検討できます。' :
+              score.total >= 65 ? '🟡 良好な銘柄。追加指標も合わせて確認しましょう。' :
+              score.total >= 50 ? '⚠️ 一部に懸念あり。継続的なモニタリングが必要です。' :
+              '❌ 複数の指標で基準を下回っています。再検討を推奨します。'}
           </div>
         </div>
       </div>
-      <h4 style="margin-bottom:10px;font-size:13px">ã¹ã³ã¢åè¨³</h4>
+      <h4 style="margin-bottom:10px;font-size:13px">スコア内訳</h4>
       ${barsHtml}
       <div style="margin-top:14px">
         ${checks.map(c => c.ok || c.label.includes('0%')
-          ? '' : `<div style="color:var(--danger);font-size:12px;margin-bottom:4px">â ï¸ ${c.label} â ${c.hint}</div>`
+          ? '' : `<div style="color:var(--danger);font-size:12px;margin-bottom:4px">⚠️ ${c.label} — ${c.hint}</div>`
         ).join('')}
       </div>
     </div>`;
@@ -1907,7 +1830,7 @@ function calcScreening() {
 function addFromScreening() {
   const code = document.getElementById('sc-code').value.trim();
   const name = document.getElementById('sc-name').value.trim();
-  if (!code || !name) { alert('ã³ã¼ãã¨éæåãå¥åãã¦ãã ãã'); return; }
+  if (!code || !name) { alert('コードと銘柄名を入力してください'); return; }
   openAddModal();
   setTimeout(() => {
     document.getElementById('f-code').value = code;
@@ -1932,13 +1855,13 @@ function addFromScreening() {
 // ==================== WATCHLIST ====================
 function addWatchItem() {
   const code = document.getElementById('w-code').value.trim().toUpperCase();
-  if (!code) { showToast('è¨¼å¸ã³ã¼ããå¥åãã¦ãã ãã'); return; }
+  if (!code) { showToast('証券コードを入力してください'); return; }
   const name = document.getElementById('w-name').value.trim();
   const market = document.getElementById('w-market').value;
   const targetYield = parseFloat(document.getElementById('w-yield').value) || 0;
   const targetPbr = parseFloat(document.getElementById('w-pbr').value) || 0;
-  if (!targetYield && !targetPbr) { showToast('ç®æ¨å©åãã¾ãã¯ç®æ¨PBRãè¨­å®ãã¦ãã ãã'); return; }
-  if ((state.watchlist || []).find(w => w.code === code)) { showToast('ãã§ã«ã¦ã©ãããªã¹ãã«ç»é²æ¸ã¿ã§ã'); return; }
+  if (!targetYield && !targetPbr) { showToast('目標利回りまたは目標PBRを設定してください'); return; }
+  if ((state.watchlist || []).find(w => w.code === code)) { showToast('すでにウォッチリストに登録済みです'); return; }
   if (!state.watchlist) state.watchlist = [];
   state.watchlist.push({
     id: 'w' + Date.now(),
@@ -1952,7 +1875,7 @@ function addWatchItem() {
   document.getElementById('w-name').value = '';
   document.getElementById('w-yield').value = '';
   document.getElementById('w-pbr').value = '';
-  showToast(`â ${code} ãã¦ã©ãããªã¹ãã«è¿½å ãã¾ãããæ ªä¾¡æ´æ°ãã¿ã³ã§ææ°å¤ãåå¾ãã¦ãã ããã`);
+  showToast(`✅ ${code} をウォッチリストに追加しました。株価更新ボタンで最新値を取得してください。`);
 }
 
 function removeWatchItem(id) {
@@ -1969,11 +1892,11 @@ function exportGasWatchlist() {
   if (!area || !text) return;
 
   if (!list.length) {
-    showToast('ã¦ã©ãããªã¹ããç©ºã§ããåã«éæãè¿½å ãã¦ãã ããã');
+    showToast('ウォッチリストが空です。先に銘柄を追加してください。');
     return;
   }
 
-  // GAS ã® Config.gs ã«è²¼ãä»ããããå½¢å¼ã§åºå
+  // GAS の Config.gs に貼り付けられる形式で出力
   const lines = list.map(w => {
     const yld = w.targetYield || 3.75;
     const pbr = w.targetPbr || 1.5;
@@ -1991,23 +1914,23 @@ function exportGasWatchlist() {
     ].join('\n');
   });
 
-  const output = `// GAS Config.gs â getDefaultWatchlist() ã® return ã«è²¼ãä»ã\n// çææ¥æ: ${new Date().toLocaleString('ja-JP')}\n// éææ°: ${list.length}ä»¶\n[\n${lines.join(',\n')}\n]`;
+  const output = `// GAS Config.gs → getDefaultWatchlist() の return に貼り付け\n// 生成日時: ${new Date().toLocaleString('ja-JP')}\n// 銘柄数: ${list.length}件\n[\n${lines.join(',\n')}\n]`;
 
   text.value = output;
   area.style.display = 'block';
   area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast(`â ${list.length}éæãã¨ã¯ã¹ãã¼ããã¾ãã`);
+  showToast(`✅ ${list.length}銘柄をエクスポートしました`);
 }
 
 function copyGasExport() {
   const text = document.getElementById('gas-export-text');
   if (!text) return;
   navigator.clipboard.writeText(text.value)
-    .then(() => showToast('ð ã¯ãªãããã¼ãã«ã³ãã¼ãã¾ãã'))
+    .then(() => showToast('📋 クリップボードにコピーしました'))
     .catch(() => {
       text.select();
       document.execCommand('copy');
-      showToast('ð ã³ãã¼ãã¾ãã');
+      showToast('📋 コピーしました');
     });
 }
 
@@ -2016,51 +1939,51 @@ function renderWatchlist() {
   if (!tbody) return;
   const list = state.watchlist || [];
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ã¦ã©ããéæãããã¾ãããä¸ã®ãã©ã¼ã ããè¿½å ãã¦ãã ããã</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">ウォッチ銘柄がありません。上のフォームから追加してください。</td></tr>';
   } else {
     tbody.innerHTML = list.map(w => {
       const yldHit = w.targetYield > 0 && w.dividendYield >= w.targetYield;
       const pbrHit = w.targetPbr > 0 && w.pbr > 0 && w.pbr <= w.targetPbr;
-      const alert = (yldHit || pbrHit) ? '<span style="background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">ð æ¡ä»¶éæï¼</span>' : '<span style="color:var(--muted);font-size:12px">å¾æ©ä¸­</span>';
-      const mktBadge = w.market === 'japan' ? '<span class="market-badge market-jp">æ¥æ¬</span>' : '<span class="market-badge market-us">ç±³å½</span>';
+      const alert = (yldHit || pbrHit) ? '<span style="background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">🔔 条件達成！</span>' : '<span style="color:var(--muted);font-size:12px">待機中</span>';
+      const mktBadge = w.market === 'japan' ? '<span class="market-badge market-jp">日本</span>' : '<span class="market-badge market-us">米国</span>';
       return `<tr style="${(yldHit||pbrHit)?'background:#fff5f5':''}">
         <td><strong>${w.code}</strong></td>
         <td>${w.name}</td>
         <td>${mktBadge}</td>
-        <td>${w.currentPrice > 0 ? 'Â¥' + w.currentPrice.toLocaleString() : 'â'}</td>
-        <td style="color:${yldHit?'var(--danger)':'inherit'}">${w.dividendYield > 0 ? w.dividendYield.toFixed(2) + '%' : 'â'}</td>
-        <td style="color:${pbrHit?'var(--danger)':'inherit'}">${w.pbr > 0 ? w.pbr.toFixed(2) + 'å' : 'â'}</td>
-        <td>${w.targetYield > 0 ? w.targetYield + '%ä»¥ä¸' : 'â'}</td>
-        <td>${w.targetPbr > 0 ? w.targetPbr + 'åä»¥ä¸' : 'â'}</td>
+        <td>${w.currentPrice > 0 ? '¥' + w.currentPrice.toLocaleString() : '—'}</td>
+        <td style="color:${yldHit?'var(--danger)':'inherit'}">${w.dividendYield > 0 ? w.dividendYield.toFixed(2) + '%' : '—'}</td>
+        <td style="color:${pbrHit?'var(--danger)':'inherit'}">${w.pbr > 0 ? w.pbr.toFixed(2) + '倍' : '—'}</td>
+        <td>${w.targetYield > 0 ? w.targetYield + '%以上' : '—'}</td>
+        <td>${w.targetPbr > 0 ? w.targetPbr + '倍以下' : '—'}</td>
         <td>${alert}</td>
-        <td><button class="action-btn" onclick="removeWatchItem('${w.id}')" title="åé¤">ðï¸</button></td>
+        <td><button class="action-btn" onclick="removeWatchItem('${w.id}')" title="削除">🗑️</button></td>
       </tr>`;
     }).join('');
   }
   const notifStatus = document.getElementById('notif-status');
   if (notifStatus) {
-    notifStatus.textContent = Notification.permission === 'granted' ? 'â éç¥: è¨±å¯æ¸ã¿' :
-      Notification.permission === 'denied' ? 'â éç¥: æå¦æ¸ã¿ï¼ãã©ã¦ã¶è¨­å®ããå¤æ´ï¼' : 'â ï¸ éç¥: æªè¨­å®ï¼ä¸ã®ãã¿ã³ããè¨±å¯ãã¦ãã ããï¼';
+    notifStatus.textContent = Notification.permission === 'granted' ? '✅ 通知: 許可済み' :
+      Notification.permission === 'denied' ? '❌ 通知: 拒否済み（ブラウザ設定から変更）' : '⚠️ 通知: 未設定（上のボタンから許可してください）';
   }
 }
 
 async function requestNotificationPermission() {
-  if (!('Notification' in window)) { showToast('ãã®ãã©ã¦ã¶ã¯éç¥ã«å¯¾å¿ãã¦ãã¾ãã'); return; }
+  if (!('Notification' in window)) { showToast('このブラウザは通知に対応していません'); return; }
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
-    showToast('â éç¥ãè¨±å¯ããã¾ãã');
+    showToast('✅ 通知が許可されました');
     const el = document.getElementById('notif-status');
-    if (el) el.textContent = 'â éç¥: è¨±å¯æ¸ã¿';
+    if (el) el.textContent = '✅ 通知: 許可済み';
   } else {
-    showToast('â ï¸ éç¥ãæå¦ããã¾ããããã©ã¦ã¶è¨­å®ããè¨±å¯ãã¦ãã ãã');
+    showToast('⚠️ 通知が拒否されました。ブラウザ設定から許可してください');
   }
 }
 
 function sendNotification(title, body) {
   if (Notification.permission === 'granted') {
-    new Notification(title, { body, icon: 'ð£' });
+    new Notification(title, { body, icon: '🐣' });
   }
-  showToast(`ð ${title}: ${body}`);
+  showToast(`🔔 ${title}: ${body}`);
 }
 
 function checkScreeningAlerts(quoteMap, usdJpy) {
@@ -2072,9 +1995,9 @@ function checkScreeningAlerts(quoteMap, usdJpy) {
     const pbrHit = w.targetPbr > 0 && pbr > 0 && pbr <= w.targetPbr;
     if ((yldHit || pbrHit) && !w.notified) {
       let reason = [];
-      if (yldHit) reason.push(`éå½å©åã${yld.toFixed(2)}% â¥ ç®æ¨${w.targetYield}%`);
-      if (pbrHit) reason.push(`PBR${pbr.toFixed(2)} â¤ ç®æ¨${w.targetPbr}`);
-      sendNotification(`ð£ è³¼å¥ã·ã°ãã«: ${w.name || w.code}`, reason.join(' / '));
+      if (yldHit) reason.push(`配当利回り${yld.toFixed(2)}% ≥ 目標${w.targetYield}%`);
+      if (pbrHit) reason.push(`PBR${pbr.toFixed(2)} ≤ 目標${w.targetPbr}`);
+      sendNotification(`🐣 購入シグナル: ${w.name || w.code}`, reason.join(' / '));
       w.notified = true;
     }
     if (!yldHit && !pbrHit) w.notified = false;
@@ -2089,7 +2012,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `é«éå½æ ªãã¼ããã©ãªãª_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `高配当株ポートフォリオ_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
 }
 
@@ -2101,17 +2024,17 @@ function importData(input) {
     try {
       const data = JSON.parse(e.target.result);
       if (data.stocks && Array.isArray(data.stocks)) {
-        if (confirm(`${data.stocks.length}éæãèª­ã¿è¾¼ã¿ã¾ããç¾å¨ã®ãã¼ã¿ãä¸æ¸ããã¾ããï¼`)) {
+        if (confirm(`${data.stocks.length}銘柄を読み込みます。現在のデータを上書きしますか？`)) {
           state.stocks = data.stocks;
           saveData();
           refreshAll();
-          alert('ã¤ã³ãã¼ããå®äºãã¾ããï¼');
+          alert('インポートが完了しました！');
         }
       } else {
-        alert('ç¡å¹ãªãã¡ã¤ã«å½¢å¼ã§ã');
+        alert('無効なファイル形式です');
       }
     } catch(err) {
-      alert('ãã¡ã¤ã«ã®èª­ã¿è¾¼ã¿ã«å¤±æãã¾ãã');
+      alert('ファイルの読み込みに失敗しました');
     }
     input.value = '';
   };
@@ -2137,7 +2060,7 @@ function initSectorSelect() {
 
 function refreshAll() {
   renderDashboard();
-  if (document.getElementById('tab-portfolio').classList.contains('active')) renderPortfolio();
+  if (document.getElementById('tab-portfolio').classList.contains('active')) renderPortFolio();
   if (document.getElementById('tab-watchlist').classList.contains('active')) renderWatchlist();
 }
 
