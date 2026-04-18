@@ -1092,6 +1092,15 @@ function updateFetchStatusUI() {
 
 // ==================== EXCHANGE RATE AUTO-FETCH ====================
 async function fetchUsdJpy() {
+  try{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),3000);
+    const r=await fetch('./fx-rate.json?t='+Date.now(),{signal:ctrl.signal});
+    clearTimeout(tid);
+    const j=await r.json();
+    const rate=j?.usdJpy;
+    if(rate&&rate>100&&rate<200)return rate;
+  }catch(_e){}
   const apis=[
     {u:"https://open.er-api.com/v6/latest/USD",g:j=>j?.rates?.JPY},
     {u:"https://api.exchangerate-api.com/v4/latest/USD",g:j=>j?.rates?.JPY},
