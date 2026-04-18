@@ -980,11 +980,8 @@ async function fetchPrices() {
     const proxy = url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
     let usdJpy = state.usdJpy || 150;
     try {
-      // CORS対応の無料FX APIを使用（プロキシ不要）
-      const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', {signal: AbortSignal.timeout(5000)});
-      const fxJson = await fxRes.json();
-      const rate = fxJson?.rates?.JPY;
-      if (rate && rate > 100 && rate < 200) { usdJpy = rate; state.usdJpy = usdJpy; }
+      const rate = await fetchUsdJpy();
+      if (rate) { usdJpy = rate; state.usdJpy = usdJpy; }
     } catch(e) { /* FXレートは前回値を使用 */ }
 
     const holdingCodes = state.stocks.map(s => {
@@ -1094,11 +1091,29 @@ function updateFetchStatusUI() {
 }
 
 // ==================== EXCHANGE RATE AUTO-FETCH ====================
+async function fetchUsdJpy() {
+  const apis=[
+    {u:"https://open.er-api.com/v6/latest/USD",g:j=>j?.rates?.JPY},
+    {u:"https://api.exchangerate-api.com/v4/latest/USD",g:j=>j?.rates?.JPY},
+    {u:"https://api.frankfurter.app/latest?from=USD&to=JPY",g:j=>j?.rates?.JPY}
+  ];
+  for(const a of apis){
+    try{
+      const ctrl=new AbortController();
+      const tid=setTimeout(()=>ctrl.abort(),5000);
+      const r=await fetch(a.u,{signal:ctrl.signal});
+      clearTimeout(tid);
+      const j=await r.json();
+      const rate=a.g(j);
+      if(rate&&rate>100&&rate<200)return rate;
+    }catch(_e){}
+  }
+  return null;
+}
+
 async function fetchExchangeRate() {
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD', {signal: AbortSignal.timeout(5000)});
-    const json = await res.json();
-    const rate = json?.rates?.JPY;
+    const rate = await fetchUsdJpy();
     if (rate && rate > 100 && rate < 200) {
       state.usdJpy = rate;
       state.lastFetchTime = new Date();
