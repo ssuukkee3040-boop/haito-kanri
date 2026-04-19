@@ -58,7 +58,7 @@ function checkBuySignals() {
   jpBatch.forEach(function(code) {
     try {
       var result = checkJapanStock(code);
-      if (result) signals.push(result);
+      if (result && (!result.warnings || result.warnings.length === 0)) signals.push(result); // 全条件クリア時のみ通知
     } catch(e) {
       Logger.log('JP error [' + code + ']: ' + e.message);
     }
@@ -68,7 +68,7 @@ function checkBuySignals() {
   US_WATCHLIST.forEach(function(item) {
     try {
       var result = checkUSStock(item.code, item.minYield);
-      if (result) signals.push(result);
+      if (result && (!result.warnings || result.warnings.length === 0)) signals.push(result); // 全条件クリア時のみ通知
     } catch(e) {
       Logger.log('US error [' + item.code + ']: ' + e.message);
     }
@@ -170,7 +170,7 @@ function checkJapanStock(code) {
     }
   }
 
-  if (metConditions.length === 0) return null;
+  if (metConditions.length === 0 || warnings.length > 0) return null; // 全条件クリア時のみシグナル返却
 
   return {
     code: code, market: 'japan',
