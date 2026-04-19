@@ -840,6 +840,7 @@ function loadData() {
       } else {
         state.stocks = parsed.stocks || [];
         state.watchlist = parsed.watchlist || [];
+        if (parsed.usdJpy && parsed.usdJpy > 100 && parsed.usdJpy < 200) state.usdJpy = parsed.usdJpy;
       }
       return;
     } catch(e) { state.stocks = []; state.watchlist = []; return; }
@@ -966,7 +967,8 @@ function loadData() {
 function saveData() {
   localStorage.setItem('haikaitoDatabase_v3', JSON.stringify({
     stocks: state.stocks,
-    watchlist: state.watchlist || []
+    watchlist: state.watchlist || [],
+    usdJpy: state.usdJpy
   }));
 }
 
@@ -1126,6 +1128,7 @@ async function fetchExchangeRate() {
     if (rate && rate > 100 && rate < 200) {
       state.usdJpy = rate;
       state.lastFetchTime = new Date();
+      {const _b=document.getElementById('fx-rate-badge');if(_b)_b.textContent='💱 1USD=¥'+rate.toFixed(1);}
       updateFetchStatusUI();
       // Re-compute JPY dividend for all US stocks
       state.stocks.forEach(s => {
@@ -1134,6 +1137,7 @@ async function fetchExchangeRate() {
         }
       });
       saveData();
+      renderDashboard();
     }
   } catch(e) { /����W�
 �����C��
@@ -2100,6 +2104,7 @@ function init() {
   document.getElementById('stock-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('stock-modal')) closeModal();
   });
+  updateFetchStatusUI();
 }
 
 init();
