@@ -1,5 +1,5 @@
 // Service Worker for 高配当株管理ツール
-const CACHE_NAME = 'haito-kanri-v1';
+const CACHE_NAME = 'haito-kanri-v2';
 const CACHE_URLS = [
   './',
   './index.html',
@@ -34,7 +34,7 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then(response => {
         // 成功したらキャッシュも更新
         const clone = response.clone();
